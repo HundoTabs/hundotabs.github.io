@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rhythm Pattern Explorer — Deathcore Strumming</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Inter:wght@300;400;500;600&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root {
+  --bg:#09090b;
+  --surface:#111115;
+  --surface2:#17171c;
+  --border:#21212a;
+  --border2:#2e2e3a;
+  --text:#e0deda;
+  --muted:#52505f;
+  --red:#b83228;
+  --red-bright:#e04030;
+  --red-dim:rgba(184,50,40,0.13);
+  --amber:#c07820;
+  --amber-dim:rgba(192,120,32,0.15);
+  --green:#1a8048;
+  --green-dim:rgba(26,128,72,0.15);
+  --blue:#1a6fa8;
+  --purple:#7040c0;
+  --purple-dim:rgba(112,64,192,0.15);
+  --mono:'Space Mono',monospace;
+  --sans:'Inter',sans-serif;
+}
+
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh}
+
+.header{padding:24px 20px 18px;border-bottom:1px solid var(--border);position:relative;overflow:hidden}
+.header::after{content:'RHYTHM';position:absolute;right:-10px;top:-8px;font-family:var(--mono);font-size:52px;font-weight:700;color:var(--border);pointer-events:none;user-select:none;line-height:1}
+.eyebrow{font-family:var(--mono);font-size:9px;letter-spacing:0.25em;text-transform:uppercase;color:var(--muted);margin-bottom:5px}
+h1{font-family:var(--mono);font-size:17px;font-weight:700;line-height:1.2;margin-bottom:3px}
+.header-sub{font-size:11px;color:var(--muted)}
+
+/* TRANSPORT */
+.transport{display:flex;align-items:center;gap:10px;padding:12px 20px;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.play-btn{
+  font-family:var(--mono);font-size:11px;font-weight:700;
+  padding:10px 18px;background:var(--red);border:none;
+  color:#fff;cursor:pointer;letter-spacing:0.08em;transition:all 0.12s;flex-shrink:0;
+}
+.play-btn:hover{background:var(--red-bright)}
+.play-btn.playing{background:#1a1a20;border:1px solid var(--red);color:var(--red)}
+.bpm-wrap{display:flex;align-items:center;gap:8px}
+.bpm-label{font-family:var(--mono);font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted)}
+.bpm-val{font-family:var(--mono);font-size:15px;font-weight:700;min-width:38px}
+.bpm-slider{-webkit-appearance:none;appearance:none;width:90px;height:2px;background:var(--border2);outline:none}
+.bpm-slider::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;border-radius:50%;background:var(--red);cursor:pointer}
+.bpm-slider::-moz-range-thumb{width:13px;height:13px;border-radius:50%;background:var(--red);cursor:pointer;border:none}
+.loop-count{font-family:var(--mono);font-size:9px;color:var(--muted);margin-left:auto}
+
+/* CATEGORY TABS */
+.cat-tabs{display:flex;border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none}
+.cat-tabs::-webkit-scrollbar{display:none}
+.cat-tab{
+  font-family:var(--mono);font-size:9px;letter-spacing:0.08em;text-transform:uppercase;
+  padding:10px 13px;background:transparent;border:none;border-right:1px solid var(--border);
+  color:var(--muted);cursor:pointer;white-space:nowrap;transition:all 0.12s;flex-shrink:0;
+}
+.cat-tab:hover{color:var(--text)}
+.cat-tab.active{color:var(--text);background:var(--surface2);border-bottom:2px solid var(--red)}
+
+/* PATTERN CARDS */
+.pat-list{padding:14px 20px 0}
+.pat-card{
+  background:var(--surface);border:1px solid var(--border);
+  margin-bottom:8px;cursor:pointer;transition:border-color 0.12s;
+}
+.pat-card:hover{border-color:var(--border2)}
+.pat-card.open{border-color:var(--red)}
+
+.pat-header{display:flex;align-items:center;gap:8px;padding:10px 13px}
+.pat-icon{
+  font-family:var(--mono);font-size:9px;
+  padding:3px 6px;flex-shrink:0;border:1px solid;
+}
+.icon-trip{border-color:#7040c0;color:#a070e0;background:var(--purple-dim)}
+.icon-quad{border-color:#b83228;color:#e06050;background:var(--red-dim)}
+.icon-duo{border-color:#1a6fa8;color:#50a0d8;background:rgba(26,111,168,0.15)}
+.icon-rest{border-color:#1a8048;color:#40c080;background:var(--green-dim)}
+.icon-mix{border-color:#c07820;color:#d09040;background:var(--amber-dim)}
+.icon-ref{border-color:#555;color:#888;background:#151518}
+
+.pat-name{font-size:12px;font-weight:500;color:var(--text);flex:1}
+.pat-ref{font-family:var(--mono);font-size:9px;color:var(--muted);flex-shrink:0}
+.pat-chev{font-size:9px;color:var(--muted);transition:transform 0.15s;flex-shrink:0}
+.pat-card.open .pat-chev{transform:rotate(180deg)}
+
+.pat-body{display:none;border-top:1px solid var(--border)}
+.pat-card.open .pat-body{display:block}
+
+/* VISUAL RHYTHM STRIP */
+.rhythm-section{padding:13px 14px;border-bottom:1px solid var(--border)}
+.rhythm-label{font-family:var(--mono);font-size:8px;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+
+.beat-row{display:flex;align-items:center;gap:0;margin-bottom:4px}
+.beat-group{display:flex;gap:2px;margin-right:6px;position:relative}
+.beat-group::after{
+  content:attr(data-beat);
+  position:absolute;bottom:-14px;left:0;
+  font-family:var(--mono);font-size:7px;color:var(--muted);
+}
+.rcell{
+  width:28px;height:36px;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  border:1px solid var(--border);
+  position:relative;transition:all 0.06s;
+  font-family:var(--mono);font-size:9px;
+  gap:2px;
+}
+.rcel-sub{font-size:7px;color:var(--muted);line-height:1}
+
+/* Cell states */
+.rcell.hit-down{background:var(--red-dim);border-color:var(--red);color:var(--red)}
+.rcell.hit-up{background:rgba(26,111,168,0.15);border-color:var(--blue);color:var(--blue)}
+.rcell.hit-accent{background:rgba(184,50,40,0.3);border-color:var(--red-bright);color:#fff}
+.rcell.hit-mute{background:rgba(112,64,192,0.15);border-color:var(--purple);color:#a070e0}
+.rcell.hit-rest{background:transparent;border-color:var(--border);color:#2a2a3a}
+.rcell.hit-open{background:var(--amber-dim);border-color:var(--amber);color:var(--amber)}
+
+/* Playing highlight */
+.rcell.playing{
+  background:#b83228!important;
+  border-color:#e04030!important;
+  color:#fff!important;
+  box-shadow:0 0 8px rgba(184,50,40,0.5);
+}
+.rcell.playing.hit-rest{
+  background:#1a1a22!important;
+  border-color:#444!important;
+  box-shadow:none!important;
+}
+
+.beat-labels{display:flex;gap:0;padding-left:0;margin-top:14px}
+.bl-group{display:flex;gap:2px;margin-right:6px}
+.bl{width:28px;text-align:center;font-family:var(--mono);font-size:7px;color:var(--muted)}
+.bl.strong{color:var(--border2)}
+
+/* Syllable display */
+.syllable-row{display:flex;gap:0;margin-top:6px}
+.syl-group{display:flex;gap:2px;margin-right:6px}
+.syl{width:28px;text-align:center;font-family:var(--mono);font-size:8px;color:var(--muted)}
+.syl.active{color:var(--text)}
+
+/* LEGEND */
+.legend{display:flex;gap:10px;flex-wrap:wrap;padding:10px 14px;border-bottom:1px solid var(--border)}
+.leg{display:flex;align-items:center;gap:5px;font-size:9px;color:var(--muted)}
+.leg-cell{width:14px;height:14px;border:1px solid;font-family:var(--mono);font-size:6px;display:flex;align-items:center;justify-content:center}
+
+/* NOTATION */
+.notation-section{padding:12px 14px;border-bottom:1px solid var(--border)}
+.notation-label{font-family:var(--mono);font-size:8px;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.notation{font-family:var(--mono);font-size:12px;color:var(--muted);letter-spacing:0.15em;line-height:2}
+.notation .D{color:var(--red)}
+.notation .U{color:var(--blue)}
+.notation .X{color:var(--purple)}
+.notation .A{color:#fff;font-weight:700}
+.notation .rest{color:#2a2a3a}
+.notation .O{color:var(--amber)}
+
+/* EXPLAIN */
+.explain-section{padding:12px 14px}
+.explain-section p{font-size:11px;color:var(--muted);line-height:1.7;margin-bottom:6px}
+.explain-section p strong{color:var(--text);font-weight:500}
+.explain-section .ref-line{
+  font-family:var(--mono);font-size:10px;
+  padding:7px 10px;background:var(--surface2);
+  border-left:2px solid var(--red);
+  color:var(--muted);margin-top:8px;line-height:1.6;
+}
+.explain-section .ref-line strong{color:var(--text)}
+
+.bottom-pad{height:48px}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="eyebrow">Strumming Vocabulary · Deathcore / Metalcore</div>
+  <h1>Rhythm Pattern Explorer</h1>
+  <p class="header-sub">Hear the feel · Watch it light up · No pitch required · Play anything over these</p>
+</div>
+
+<div class="transport">
+  <button class="play-btn" id="playBtn" onclick="togglePlay()">▶ PLAY</button>
+  <div class="bpm-wrap">
+    <span class="bpm-label">BPM</span>
+    <span class="bpm-val" id="bpmVal">140</span>
+    <input type="range" class="bpm-slider" id="bpmSlider" min="50" max="220" value="140" oninput="updateBpm(this.value)">
+  </div>
+  <div class="loop-count" id="loopCount"></div>
+</div>
+
+<div class="cat-tabs" id="catTabs"></div>
+<div class="pat-list" id="patList"></div>
+<div class="bottom-pad"></div>
+
+<script>
+// ── NOTATION KEY ──────────────────────────────────────────────────────────
+// Each step: { type, label, sub }
+// types: 'down','up','accent','mute','rest','open'
+// Pattern is an array of beats, each beat is array of steps (subdivisions)
+
+// D = downstroke palm muted
+// U = upstroke
+// A = accented hit (open or power)
+// X = muted click (percussive mute)
+// _ = rest (silence)
+// O = open ring
+
+const T = {
+  D: { type:'hit-down',  sym:'D', sub:'dn' },
+  U: { type:'hit-up',    sym:'U', sub:'up' },
+  A: { type:'hit-accent',sym:'A', sub:'acc' },
+  X: { type:'hit-mute',  sym:'X', sub:'x'  },
+  _: { type:'hit-rest',  sym:'·', sub:''   },
+  O: { type:'hit-open',  sym:'O', sub:'rng' },
+};
+
+const CATS = [
+  { id:'basics', label:'Basics' },
+  { id:'triplet', label:'Triplets' },
+  { id:'synco', label:'Syncopation' },
+  { id:'combo', label:'Combos' },
+  { id:'ref', label:'Artist Ref' },
+];
+
+// Pattern format:
+// beats: array of 4 beats, each beat = array of subdivisions
+// Each subdivision = key from T above
+// 16th note grid = 4 per beat. Triplet = 3 per beat. Mix = variable.
+// We flatten for playback, display grouped by beat
+
+const PATTERNS = [
+  // ── BASICS ──
+  {
+    cat:'basics',
+    name:'Straight 16ths (Your Default)',
+    ref:'Reference point',
+    icon:'icon-quad',iconLabel:'16th',
+    bpm:160,
+    desc:'Every 16th note hit, all downstrokes, palm muted. This is your current default. Everything else in this tool is a departure from or variation of this. Notice how mechanical and relentless it sounds.',
+    refLine:'<strong>What it sounds like:</strong> da da da da da da da da — perfectly even, no breathing, pure grid.',
+    // 4 beats × 4 subdivisions
+    beats:[
+      [T.D,T.D,T.D,T.D],
+      [T.D,T.D,T.D,T.D],
+      [T.D,T.D,T.D,T.D],
+      [T.D,T.D,T.D,T.D],
+    ],
+    beatLabels:['1','e','+','a','2','e','+','a','3','e','+','a','4','e','+','a'],
+    syllables:['da','da','da','da','da','da','da','da','da','da','da','da','da','da','da','da'],
+  },
+  {
+    cat:'basics',
+    name:'8th Notes with Rests',
+    ref:'Creates breathing',
+    icon:'icon-rest',iconLabel:'8th+rest',
+    bpm:140,
+    desc:'Hit every other 16th (the downbeat of each 8th note), leave the "e" and "a" silent. Instantly sounds less mechanical. The silence is doing musical work — it gives the hit room to breathe and hit harder.',
+    refLine:'<strong>What it sounds like:</strong> da _ da _ da _ da _ — every hit has space after it. More punch, less grid.',
+    beats:[
+      [T.D,T._,T.D,T._],
+      [T.D,T._,T.D,T._],
+      [T.D,T._,T.D,T._],
+      [T.D,T._,T.D,T._],
+    ],
+    beatLabels:['1','e','+','a','2','e','+','a','3','e','+','a','4','e','+','a'],
+    syllables:['da','·','da','·','da','·','da','·','da','·','da','·','da','·','da','·'],
+  },
+  {
+    cat:'basics',
+    name:'Down-Up 8ths',
+    ref:'Metalcore strumming base',
+    icon:'icon-duo',iconLabel:'D-U',
+    bpm:130,
+    desc:'Alternate down and up strokes on every 8th note. Downstroke on the beat, upstroke on the "+" (and). The upstroke is lighter — it naturally creates accent on the downstroke. This is the physical foundation of fast rhythm guitar.',
+    refLine:'<strong>What it sounds like:</strong> DA du DA du DA du DA du — uppercase hits harder naturally from the downstroke angle.',
+    beats:[
+      [T.A,T._,T.U,T._],
+      [T.A,T._,T.U,T._],
+      [T.A,T._,T.U,T._],
+      [T.A,T._,T.U,T._],
+    ],
+    beatLabels:['1','e','+','a','2','e','+','a','3','e','+','a','4','e','+','a'],
+    syllables:['DA','·','du','·','DA','·','du','·','DA','·','du','·','DA','·','du','·'],
+  },
+  {
+    cat:'basics',
+    name:'Accent on 2 and 4',
+    ref:'Rock feel baseline',
+    icon:'icon-quad',iconLabel:'accent',
+    bpm:140,
+    desc:'16th notes but beats 2 and 4 are accented (lifted from mute slightly, hit harder). This is where rock rhythm lives — the accent tells your ear where beat 2 and 4 are, which is the snare position. You feel it as a forward-moving groove rather than a wall.',
+    refLine:'<strong>What it sounds like:</strong> da da DA da da da DA da — the accented beats pop out of the grid.',
+    beats:[
+      [T.D,T.D,T.D,T.D],
+      [T.A,T.D,T.D,T.D],
+      [T.D,T.D,T.D,T.D],
+      [T.A,T.D,T.D,T.D],
+    ],
+    beatLabels:['1','e','+','a','2','e','+','a','3','e','+','a','4','e','+','a'],
+    syllables:['da','da','da','da','DA','da','da','da','da','da','da','da','DA','da','da','da'],
+  },
+
+  // ── TRIPLETS ──
+  {
+    cat:'triplet',
+    name:'Quarter Note Triplets',
+    ref:'Gallop / Pantera feel',
+    icon:'icon-trip',iconLabel:'triplet',
+    bpm:130,
+    desc:'Three notes per beat instead of four. The syllable is "trip-a-let trip-a-let." This is the gallop feel — it rolls forward instead of marching. Over 4 beats you get 12 notes instead of 16, and the uneven spacing is where the groove comes from.',
+    refLine:'<strong>What it sounds like:</strong> dun-da-da dun-da-da dun-da-da dun-da-da — that rolling lurch is the gallop.',
+    // 4 beats × 3 triplet subdivisions = 12 total
+    beats:[
+      [T.A,T.D,T.D],
+      [T.A,T.D,T.D],
+      [T.A,T.D,T.D],
+      [T.A,T.D,T.D],
+    ],
+    beatLabels:['1','t','t','2','t','t','3','t','t','4','t','t'],
+    syllables:['DUN','da','da','DUN','da','da','DUN','da','da','DUN','da','da'],
+    isTriplet:true,
+  },
+  {
+    cat:'triplet',
+    name:'Triplet with Rest on 3',
+    ref:'Deathcore breakdown feel',
+    icon:'icon-trip',iconLabel:'trip+rest',
+    bpm:115,
+    desc:'Triplet grouping but the third note of each group is silence. Hit-hit-REST hit-hit-REST. The rest creates a micro-pause that makes each group feel more violent — the silence punctuates the hits. This is a breakdown rhythm, not a verse rhythm.',
+    refLine:'<strong>What it sounds like:</strong> dun-da-· dun-da-· — those rests are where the guitar "breathes" between hits.',
+    beats:[
+      [T.A,T.D,T._],
+      [T.A,T.D,T._],
+      [T.A,T.D,T._],
+      [T.A,T.D,T._],
+    ],
+    beatLabels:['1','t','·','2','t','·','3','t','·','4','t','·'],
+    syllables:['DUN','da','·','DUN','da','·','DUN','da','·','DUN','da','·'],
+    isTriplet:true,
+  },
+  {
+    cat:'triplet',
+    name:'Triplet Burst then Rest',
+    ref:'Carcosa / Lorna Shore stabs',
+    icon:'icon-trip',iconLabel:'burst',
+    bpm:140,
+    desc:'Two beats of triplet burst, two beats of silence. The burst sounds like a rapid-fire stab, the silence after makes the next burst hit harder. This is the "machine gun then stop" move you hear in modern deathcore. The rest is the punchline.',
+    refLine:'<strong>What it sounds like:</strong> dndndndndn · · · · · · dndndndndn · · · · · · — burst, silence, burst, silence.',
+    beats:[
+      [T.D,T.D,T.D],
+      [T.D,T.D,T.D],
+      [T._,T._,T._],
+      [T._,T._,T._],
+    ],
+    beatLabels:['1','t','t','2','t','t','3','·','·','4','·','·'],
+    syllables:['dn','dn','dn','dn','dn','dn','·','·','·','·','·','·'],
+    isTriplet:true,
+  },
+  {
+    cat:'triplet',
+    name:'Triplet into Quad Landing',
+    ref:'Section transition move',
+    icon:'icon-trip',iconLabel:'3→4',
+    bpm:135,
+    desc:'Three beats of triplets, then beat 4 switches to straight 16ths. The rhythmic shift on beat 4 signals a section change — your ear hears the grid change and anticipates something new. Use this at the end of a 4-bar phrase to signal a transition.',
+    refLine:'<strong>What it sounds like:</strong> dndndn dndndn dndndn da-da-da-DA — that last beat feels like a landing after turbulence.',
+    beats:[
+      [T.D,T.D,T.D],
+      [T.D,T.D,T.D],
+      [T.D,T.D,T.D],
+      [T.D,T.D,T.D,T.A], // quad on beat 4
+    ],
+    beatLabels:['1','t','t','2','t','t','3','t','t','4','e','+','a'],
+    syllables:['dn','dn','dn','dn','dn','dn','dn','dn','dn','da','da','da','DA'],
+    mixedLast:true,
+  },
+
+  // ── SYNCOPATION ──
+  {
+    cat:'synco',
+    name:'The Anticipation (Land Early)',
+    ref:'Angelmaker / Knocked Loose',
+    icon:'icon-rest',iconLabel:'anticipate',
+    bpm:150,
+    desc:'The hit lands on the "a" of beat 3 instead of beat 4. One 16th note early. Your ear expects the hit on beat 4 but it comes just before — that early landing is called anticipation and it\'s the core move of deathcore rhythm. The ground shifts under you.',
+    refLine:'<strong>What it sounds like:</strong> da da da · da da DA da — that DA coming a 16th early is the whole trick.',
+    beats:[
+      [T.D,T.D,T.D,T._],
+      [T.D,T.D,T.D,T._],
+      [T.D,T.D,T.D,T.A],
+      [T.D,T.D,T._,T._],
+    ],
+    beatLabels:['1','e','+','a','2','e','+','a','3','e','+','a','4','e','+','a'],
+    syllables:['da','da','da','·','da','da','da','·','da','da','da','DA','da','·','·','·'],
+  },
+  {
+    cat:'synco',
+    name:'Off-Beat Stab (+ of 2)',
+    ref:'Meshuggah influence',
+    icon:'icon-rest',iconLabel:'offbeat',
+    bpm:145,
+    desc:'Chugs on the beat, but a hard accent stab lands on the "+" (and) of beat 2 — right between beats 2 and 3. That in-between landing is the source of the angular, math-metal feel. It doesn\'t land where you expect, ever.',
+    refLine:'<strong>What it sounds like:</strong> da da · DA · da da · — that DA in the gap is the angular moment.',
+    beats:[
+      [T.D,T.D,T.D,T.D],
+      [T.D,T._,T.A,T._],
+      [T.D,T.D,T.D,T.D],
+      [T.D,T._,T.A,T._],
+    ],
+    beatLabels:['1','e','+','a','2','e','+','a','3','e','+','a','4','e','+','a'],
+    syllables:['da','da','da','da','da','·','DA','·','da','da','da','da','da','·','DA','·'],
+  },
+  {
+    cat:'synco',
+    name:'Duo Pause Duo (Your Example)',
+    ref:'What you described',
+    icon:'icon-duo',iconLabel:'2+2',
+    bpm:138,
+    desc:'Two hits, pause, two hits, pause — repeating. "da da · · da da · ·" This is a deceptively simple pattern that sounds deliberate and heavy. Each duo lands and has space to breathe before the next pair. Great for breakdowns and mid-paced riffs.',
+    refLine:'<strong>What it sounds like:</strong> da da · · da da · · — the pairs feel like punches with a reset between each.',
+    beats:[
+      [T.D,T.D,T._,T._],
+      [T.D,T.D,T._,T._],
+      [T.D,T.D,T._,T._],
+      [T.D,T.D,T._,T._],
+    ],
+    beatLabels:['1','e','+','a','2','e','+','a','3','e','+','a','4','e','+','a'],
+    syllables:['da','da','·','·','da','da','·','·','da','da','·','·','da','da','·','·'],
+  },
+  {
+    cat:'synco',
+    name:'Quad Pause Quad Pause',
+    ref:'High speed burst + breathe',
+    icon:'icon-quad',iconLabel:'4+rest',
+    bpm:155,
+    desc:'Four fast hits, then two 16ths of silence, repeat. The burst of four sounds like a rapid-fire spray, the silence resets. At high BPM this creates that "machine stutter" quality. Your ear groups the 4-hit bursts as one event rather than four individual notes.',
+    refLine:'<strong>What it sounds like:</strong> dndndn · · dndndn · · — dense burst then space, over and over.',
+    beats:[
+      [T.D,T.D,T.D,T.D],
+      [T._,T._,T.D,T.D],
+      [T.D,T.D,T._,T._],
+      [T.D,T.D,T.D,T.D],
+    ],
+    beatLabels:['1','e','+','a','2','e','+','a','3','e','+','a','4','e','+','a'],
+    syllables:['dn','dn','dn','dn','·','·','dn','dn','dn','dn','·','·','dn','dn','dn','dn'],
+  },
+
+  // ── COMBOS ──
+  {
+    cat:'combo',
+    name:'Duo Triplet Duo (Your Example)',
+    ref:'What you described',
+    icon:'icon-mix',iconLabel:'2+3+2',
+    bpm:132,
+    desc:'Two hits, then a triplet burst, then two hits. "da da · dndndn da da ·" The triplet in the middle feels like an acceleration — you settle into the pair, the triplet rushes, you land back in the pair. This is motif-based rhythm: a small shape with a middle eruption.',
+    refLine:'<strong>What it sounds like:</strong> da da · dn-dn-dn da da · — that triplet middle is the "eruption" between the pairs.',
+    // beat 1: duo, beat 2: rest+triplet, beat 3: duo, beat 4: rest
+    // We'll approximate with 16th grid: dd__ ddd_ dd__ ____
+    beats:[
+      [T.D,T.D,T._,T._],
+      [T.D,T.D,T.D,T._],
+      [T.D,T.D,T._,T._],
+      [T._,T._,T._,T._],
+    ],
+    beatLabels:['1','e','+','a','2','e','+','a','3','e','+','a','4','e','+','a'],
+    syllables:['da','da','·','·','dn','dn','dn','·','da','da','·','·','·','·','·','·'],
+  },
+  {
+    cat:'combo',
+    name:'Triplet Pair into Open Landing',
+    ref:'Carcosa bridge feel',
+    icon:'icon-mix',iconLabel:'3+open',
+    bpm:128,
+    desc:'A triplet burst followed by a single open (unmuted) note that rings. The open note is the landing — it\'s bright and sustained after the dense triplet. The contrast between dense muted burst and single ringing note is massive. This is where your open cascade instinct meets rhythm.',
+    refLine:'<strong>What it sounds like:</strong> dndndn-RING · · · dndndn-RING · — that ringing landing cuts through everything.',
+    beats:[
+      [T.D,T.D,T.D],
+      [T.O,T._,T._],
+      [T.D,T.D,T.D],
+      [T.O,T._,T._],
+    ],
+    beatLabels:['1','t','t','2','·','·','3','t','t','4','·','·'],
+    syllables:['dn','dn','dn','RING','·','·','dn','dn','dn','RING','·','·'],
+    isTriplet:true,
+  },
+  {
+    cat:'combo',
+    name:'Stutter Quad (4+1+rest)',
+    ref:'Fit For An Autopsy feel',
+    icon:'icon-mix',iconLabel:'stutter',
+    bpm:143,
+    desc:'Four 16th chugs, a single hard accent hit, then silence. The accent after the quad is the "last word" before the silence drops. The quad sets up the expectation, the accent is the punch, the rest is the aftermath. This is a full micro-phrase in one beat.',
+    refLine:'<strong>What it sounds like:</strong> dndndn-DA · · — that accent feels like a full stop.',
+    beats:[
+      [T.D,T.D,T.D,T.A],
+      [T._,T._,T._,T._],
+      [T.D,T.D,T.D,T.A],
+      [T._,T._,T._,T._],
+    ],
+    beatLabels:['1','e','+','a','2','e','+','a','3','e','+','a','4','e','+','a'],
+    syllables:['dn','dn','dn','DA','·','·','·','·','dn','dn','dn','DA','·','·','·','·'],
+  },
+  {
+    cat:'combo',
+    name:'Muted Click Pattern',
+    ref:'Percussive texture',
+    icon:'icon-mix',iconLabel:'mute+hit',
+    bpm:136,
+    desc:'Mix of muted "dead" clicks (X) and actual hits (D). The clicks are percussive — your pick hits the strings but your palm mutes so hard it\'s basically a click. This gives the rhythm a drum-like quality. Used between hits it fills the gaps without actually sounding like a note.',
+    refLine:'<strong>What it sounds like:</strong> DA-x-x-DA-x-x — the x fills space without adding pitch. Rhythmic texture.',
+    beats:[
+      [T.A,T.X,T.X,T.D],
+      [T.A,T.X,T.X,T.D],
+      [T.A,T.X,T.D,T.X],
+      [T.A,T.X,T.D,T.X],
+    ],
+    beatLabels:['1','e','+','a','2','e','+','a','3','e','+','a','4','e','+','a'],
+    syllables:['DA','x','x','da','DA','x','x','da','DA','x','da','x','DA','x','da','x'],
+  },
+
+  // ── ARTIST REF ──
+  {
+    cat:'ref',
+    name:'Angelmaker — Verse Stab Pattern',
+    ref:'Angelmaker',
+    icon:'icon-ref',iconLabel:'artist',
+    bpm:158,
+    desc:'Dense 16th chugs with a syncopated accent landing on the "a" of beat 2 and "+" of beat 4. The accent disrupts the grid just enough to create a lurch. Everything else is tight palm muted 16ths. The accents are the "stab" moments — usually where the tritone or power chord hits.',
+    refLine:'<strong>Angelmaker rhythm signature:</strong> tight 16th foundation with accents landing slightly before where you expect them.',
+    beats:[
+      [T.D,T.D,T.D,T.D],
+      [T.D,T.D,T.D,T.A],
+      [T.D,T.D,T.D,T.D],
+      [T.D,T.A,T.D,T.D],
+    ],
+    beatLabels:['1','e','+','a','2','e','+','a','3','e','+','a','4','e','+','a'],
+    syllables:['da','da','da','da','da','da','da','DA','da','da','da','da','da','DA','da','da'],
+  },
+  {
+    cat:'ref',
+    name:'Carcosa — Half-Time Pound',
+    ref:'Carcosa',
+    icon:'icon-ref',iconLabel:'artist',
+    bpm:112,
+    desc:'Slow and deliberate. One hit on beat 1, nothing until the "+" of beat 2 (early), then a long rest, repeat the phrase. Everything is space and placement. At this BPM each hit lands like a dropped weight. This is what half-time breakdown feels like when done with restraint.',
+    refLine:'<strong>Carcosa feel:</strong> the space between hits is as composed as the hits themselves. Silence is a tool.',
+    beats:[
+      [T.A,T._,T._,T._],
+      [T._,T._,T.A,T._],
+      [T._,T._,T._,T._],
+      [T.D,T.D,T._,T._],
+    ],
+    beatLabels:['1','e','+','a','2','e','+','a','3','e','+','a','4','e','+','a'],
+    syllables:['DA','·','·','·','·','·','DA','·','·','·','·','·','da','da','·','·'],
+  },
+  {
+    cat:'ref',
+    name:'Lorna Shore — Blast Stutter',
+    ref:'Lorna Shore',
+    icon:'icon-ref',iconLabel:'artist',
+    bpm:175,
+    desc:'Fast 16ths for 2 beats, complete stop for half a beat, then a single massive accent. The stop is jarring at this speed — your ear is locked into the grid and the sudden silence feels like falling. The accent after is the landing. Lorna Shore uses this to create those dramatic "drop" moments.',
+    refLine:'<strong>Lorna Shore feel:</strong> speed → sudden stop → heavy land. The contrast between 175bpm grid and silence is the drama.',
+    beats:[
+      [T.D,T.D,T.D,T.D],
+      [T.D,T.D,T.D,T.D],
+      [T._,T._,T.A,T._],
+      [T._,T._,T._,T._],
+    ],
+    beatLabels:['1','e','+','a','2','e','+','a','3','e','+','a','4','e','+','a'],
+    syllables:['da','da','da','da','da','da','da','da','·','·','DA','·','·','·','·','·'],
+  },
+  {
+    cat:'ref',
+    name:'Knocked Loose — Pound and Gap',
+    ref:'Knocked Loose',
+    icon:'icon-ref',iconLabel:'artist',
+    bpm:148,
+    desc:'Three hits grouped tight, gap, three hits, gap — but the grouping starts on the "e" of beat 1, not beat 1 itself. Being slightly off the downbeat from the start gives everything an angular, uncomfortable quality. This is metalcore rhythm at its most physical.',
+    refLine:'<strong>Knocked Loose feel:</strong> angular groupings that never quite line up with where you think beat 1 is.',
+    beats:[
+      [T._,T.D,T.D,T.D],
+      [T._,T._,T.D,T.D],
+      [T.D,T._,T._,T.D],
+      [T.D,T.D,T._,T._],
+    ],
+    beatLabels:['1','e','+','a','2','e','+','a','3','e','+','a','4','e','+','a'],
+    syllables:['·','da','da','da','·','·','da','da','da','·','·','da','da','da','·','·'],
+  },
+  {
+    cat:'ref',
+    name:'Fit For An Autopsy — Grind and Land',
+    ref:'Fit For An Autopsy',
+    icon:'icon-ref',iconLabel:'artist',
+    bpm:133,
+    desc:'Dense 16ths for a beat and a half, then a huge accented landing, long rest. The "grind" section is relentless, the landing is the exhale. FFAA uses this to make their heavy riffs feel like waves — pressure building, then release. The rest after the accent is as long as the grind.',
+    refLine:'<strong>FFAA feel:</strong> build → land → breathe. Each phrase is a complete arc of tension and release.',
+    beats:[
+      [T.D,T.D,T.D,T.D],
+      [T.D,T.D,T.A,T._],
+      [T._,T._,T._,T._],
+      [T.D,T.D,T.D,T.A],
+    ],
+    beatLabels:['1','e','+','a','2','e','+','a','3','e','+','a','4','e','+','a'],
+    syllables:['da','da','da','da','da','da','DA','·','·','·','·','·','da','da','da','DA'],
+  },
+];
+
+// ── AUDIO ─────────────────────────────────────────────────────────────────
+let ctx=null, isPlaying=false, schedulerTimer=null;
+let currentStep=0, nextNoteTime=0, totalSteps=0;
+let currentPat=null;
+let flatSteps=[];
+let loopCount=0;
+
+const LOOKAHEAD=0.08, SCHED_MS=20;
+
+function getCtx(){
+  if(!ctx) ctx=new(window.AudioContext||window.webkitAudioContext)();
+  return ctx;
+}
+
+function playHit(time, type, loud){
+  const c=getCtx();
+  const g=c.createGain();
+  g.connect(c.destination);
+  const vol = loud ? 0.55 : 0.35;
+
+  if(type==='hit-rest') return;
+
+  if(type==='hit-mute'){
+    // Percussive mute click
+    const buf=c.createBuffer(1,c.sampleRate*0.03,c.sampleRate);
+    const d=buf.getChannelData(0);
+    for(let i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*Math.exp(-i/(c.sampleRate*0.008));
+    const s=c.createBufferSource();
+    s.buffer=buf;
+    const f=c.createBiquadFilter();
+    f.type='bandpass';f.frequency.value=800;f.Q.value=3;
+    s.connect(f);f.connect(g);
+    g.gain.setValueAtTime(vol*0.7,time);
+    g.gain.exponentialRampToValueAtTime(0.001,time+0.03);
+    s.start(time);s.stop(time+0.04);
+    return;
+  }
+
+  if(type==='hit-open'){
+    // Open ringing note
+    const osc=c.createOscillator();
+    const f=c.createBiquadFilter();
+    f.type='lowpass';f.frequency.value=1800;
+    const dist=c.createWaveShaper();
+    dist.curve=makeCurve(120);
+    osc.type='sawtooth';
+    osc.frequency.value=110;
+    osc.connect(dist);dist.connect(f);f.connect(g);
+    g.gain.setValueAtTime(vol*0.8,time);
+    g.gain.exponentialRampToValueAtTime(0.001,time+0.6);
+    osc.start(time);osc.stop(time+0.7);
+    return;
+  }
+
+  // Palm muted hit (down/up/accent)
+  const isAccent = type==='hit-accent';
+  const freq = isAccent ? 110 : 55;
+  const gainVal = isAccent ? vol*1.1 : vol;
+  const decay = isAccent ? 0.18 : 0.10;
+
+  const osc1=c.createOscillator();
+  const osc2=c.createOscillator();
+  const dist=c.createWaveShaper();
+  const filt=c.createBiquadFilter();
+  dist.curve=makeCurve(isAccent?400:280);
+  filt.type='bandpass';
+  filt.frequency.value=isAccent?600:400;
+  filt.Q.value=1.5;
+  osc1.type='sawtooth';osc1.frequency.value=freq;
+  osc2.type='sawtooth';osc2.frequency.value=freq*1.004;
+  osc1.connect(dist);osc2.connect(dist);
+  dist.connect(filt);filt.connect(g);
+  g.gain.setValueAtTime(gainVal,time);
+  g.gain.exponentialRampToValueAtTime(0.001,time+decay);
+  osc1.start(time);osc1.stop(time+decay+0.05);
+  osc2.start(time);osc2.stop(time+decay+0.05);
+
+  // Add click transient for accent
+  if(isAccent){
+    const click=c.createOscillator();
+    const cg=c.createGain();
+    click.type='sine';click.frequency.value=200;
+    click.connect(cg);cg.connect(c.destination);
+    cg.gain.setValueAtTime(0.3,time);
+    cg.gain.exponentialRampToValueAtTime(0.001,time+0.02);
+    click.start(time);click.stop(time+0.03);
+  }
+}
+
+function makeCurve(amt){
+  const n=256,c=new Float32Array(n);
+  for(let i=0;i<n;i++){const x=(i*2)/n-1;c[i]=((Math.PI+amt)*x)/(Math.PI+amt*Math.abs(x));}
+  return c;
+}
+
+// Build flat step array from pattern
+function buildFlatSteps(pat){
+  const steps=[];
+  pat.beats.forEach(beat=>{
+    beat.forEach(step=>{
+      steps.push(step);
+    });
+  });
+  return steps;
+}
+
+function scheduler(){
+  const c=getCtx();
+  const stepsPerBeat = currentPat.isTriplet ? 3 : (currentPat.mixedLast ? 'mixed' : 4);
+  const stepDur = (60/bpm) / (currentPat.isTriplet ? 3 : 4);
+
+  while(nextNoteTime < c.currentTime + LOOKAHEAD){
+    scheduleStep(currentStep, nextNoteTime, stepDur);
+    currentStep=(currentStep+1)%flatSteps.length;
+    if(currentStep===0) loopCount++;
+    nextNoteTime+=stepDur;
+  }
+  schedulerTimer=setTimeout(scheduler,SCHED_MS);
+}
+
+function scheduleStep(step, time, dur){
+  const s=flatSteps[step];
+  if(s.type!=='hit-rest'){
+    const isLoud = s.type==='hit-accent'||s.type==='hit-open';
+    playHit(time, s.type, isLoud);
+  }
+  const c=getCtx();
+  const delay=(time-c.currentTime)*1000;
+  const stepRef=step;
+  const patRef=currentPatIdx;
+  setTimeout(()=>{
+    if(!isPlaying||patRef!==currentPatIdx) return;
+    // Clear prev
+    const prev=(stepRef-1+flatSteps.length)%flatSteps.length;
+    const prevEl=document.getElementById(`rs-${prev}`);
+    if(prevEl) prevEl.classList.remove('playing');
+    // Light current
+    const el=document.getElementById(`rs-${stepRef}`);
+    if(el) el.classList.add('playing');
+    document.getElementById('loopCount').textContent=`loop ${loopCount+1}`;
+  }, Math.max(0,delay));
+}
+
+let bpm=140;
+let currentPatIdx=0;
+let currentCat='basics';
+
+function updateBpm(v){
+  bpm=parseInt(v);
+  document.getElementById('bpmVal').textContent=bpm;
+}
+
+function togglePlay(){
+  if(isPlaying) stopPlay(); else startPlay();
+}
+
+function startPlay(){
+  getCtx();
+  if(ctx.state==='suspended') ctx.resume();
+  isPlaying=true;
+  currentStep=0;
+  loopCount=0;
+  nextNoteTime=ctx.currentTime+0.05;
+  document.getElementById('playBtn').textContent='■ STOP';
+  document.getElementById('playBtn').classList.add('playing');
+  scheduler();
+}
+
+function stopPlay(){
+  isPlaying=false;
+  clearTimeout(schedulerTimer);
+  document.getElementById('playBtn').textContent='▶ PLAY';
+  document.getElementById('playBtn').classList.remove('playing');
+  document.querySelectorAll('.rcell.playing').forEach(e=>e.classList.remove('playing'));
+  document.getElementById('loopCount').textContent='';
+  currentStep=0;
+}
+
+// ── BUILD UI ──────────────────────────────────────────────────────────────
+function buildCatTabs(){
+  const c=document.getElementById('catTabs');
+  c.innerHTML='';
+  CATS.forEach(cat=>{
+    const btn=document.createElement('button');
+    btn.className='cat-tab'+(cat.id===currentCat?' active':'');
+    btn.textContent=cat.label;
+    btn.onclick=()=>{ currentCat=cat.id; buildCatTabs(); buildPatList(); };
+    c.appendChild(btn);
+  });
+}
+
+function buildPatList(){
+  const list=document.getElementById('patList');
+  list.innerHTML='';
+  const filtered=PATTERNS.filter(p=>p.cat===currentCat);
+  filtered.forEach((pat,i)=>{
+    const globalIdx=PATTERNS.indexOf(pat);
+    const card=document.createElement('div');
+    card.className='pat-card'+(globalIdx===currentPatIdx?' open':'');
+    card.innerHTML=`
+      <div class="pat-header" onclick="selectPat(${globalIdx})">
+        <span class="pat-icon ${pat.icon}">${pat.iconLabel}</span>
+        <span class="pat-name">${pat.name}</span>
+        <span class="pat-ref">${pat.ref}</span>
+        <span class="pat-chev">▼</span>
+      </div>
+      <div class="pat-body">${globalIdx===currentPatIdx?buildPatBody(pat):'loading'}</div>
+    `;
+    list.appendChild(card);
+  });
+}
+
+function buildPatBody(pat){
+  // Legend
+  const legendHtml=`
+    <div class="legend">
+      <div class="leg"><div class="leg-cell hit-down" style="border-color:var(--red)">D</div>Down (PM)</div>
+      <div class="leg"><div class="leg-cell hit-up" style="border-color:var(--blue)">U</div>Up stroke</div>
+      <div class="leg"><div class="leg-cell hit-accent" style="border-color:var(--red-bright)">A</div>Accent</div>
+      <div class="leg"><div class="leg-cell hit-mute" style="border-color:var(--purple)">X</div>Mute click</div>
+      <div class="leg"><div class="leg-cell hit-open" style="border-color:var(--amber)">O</div>Open ring</div>
+      <div class="leg"><div class="leg-cell hit-rest" style="border-color:var(--border)">·</div>Rest</div>
+    </div>`;
+
+  // Build sequencer cells
+  const flat=buildFlatSteps(pat);
+  let cellsHtml='<div class="rhythm-section"><div class="rhythm-label">Rhythm grid — hit Play to animate</div><div class="beat-row">';
+
+  pat.beats.forEach((beat,bi)=>{
+    cellsHtml+=`<div class="beat-group" data-beat="${bi+1}">`;
+    beat.forEach((step,si)=>{
+      const globalSi = pat.beats.slice(0,bi).reduce((a,b)=>a+b.length,0)+si;
+      cellsHtml+=`<div class="rcell ${step.type}" id="rs-${globalSi}">
+        <span>${step.sym}</span>
+        <span class="rcel-sub">${step.sub}</span>
+      </div>`;
+    });
+    cellsHtml+='</div>';
+  });
+  cellsHtml+='</div>';
+
+  // Beat labels
+  cellsHtml+='<div class="beat-labels">';
+  pat.beats.forEach((beat,bi)=>{
+    cellsHtml+=`<div class="bl-group">`;
+    beat.forEach((_,si)=>{
+      const label=pat.beatLabels[pat.beats.slice(0,bi).reduce((a,b)=>a+b.length,0)+si]||'';
+      const isStrong=si===0;
+      cellsHtml+=`<div class="bl${isStrong?' strong':''}">${label}</div>`;
+    });
+    cellsHtml+='</div>';
+  });
+  cellsHtml+='</div>';
+
+  // Syllables
+  cellsHtml+='<div class="syllable-row">';
+  pat.beats.forEach((beat,bi)=>{
+    cellsHtml+=`<div class="syl-group">`;
+    beat.forEach((_,si)=>{
+      const idx=pat.beats.slice(0,bi).reduce((a,b)=>a+b.length,0)+si;
+      const syl=pat.syllables[idx]||'·';
+      const isActive=syl!=='·';
+      cellsHtml+=`<div class="syl${isActive?' active':''}">${syl}</div>`;
+    });
+    cellsHtml+='</div>';
+  });
+  cellsHtml+='</div></div>';
+
+  // Notation row
+  const notationMap={
+    'hit-down':'<span class="D">D</span>',
+    'hit-up':'<span class="U">U</span>',
+    'hit-accent':'<span class="A">A</span>',
+    'hit-mute':'<span class="X">X</span>',
+    'hit-rest':'<span class="rest">·</span>',
+    'hit-open':'<span class="O">O</span>',
+  };
+  const notationStr=flat.map(s=>notationMap[s.type]||'·').join(' ');
+  const notationHtml=`<div class="notation-section">
+    <div class="notation-label">Notation</div>
+    <div class="notation">${notationStr}</div>
+  </div>`;
+
+  // Explain
+  const explainHtml=`<div class="explain-section">
+    <p>${pat.desc}</p>
+    <div class="ref-line">${pat.refLine}</div>
+  </div>`;
+
+  return legendHtml+cellsHtml+notationHtml+explainHtml;
+}
+
+function selectPat(idx){
+  const wasPlaying=isPlaying;
+  if(isPlaying) stopPlay();
+  currentPatIdx=idx;
+  currentPat=PATTERNS[idx];
+  flatSteps=buildFlatSteps(currentPat);
+  bpm=currentPat.bpm;
+  document.getElementById('bpmVal').textContent=bpm;
+  document.getElementById('bpmSlider').value=bpm;
+  buildPatList();
+  if(wasPlaying) startPlay();
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────
+currentPat=PATTERNS[0];
+flatSteps=buildFlatSteps(currentPat);
+buildCatTabs();
+buildPatList();
+</script>
+</body>
+</html>

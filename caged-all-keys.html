@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CAGED — All 12 Keys — 7-String Drop A</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Inter:wght@300;400;500;600&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root {
+  --bg:#08080a;
+  --surface:#111114;
+  --surface2:#18181c;
+  --border:#222228;
+  --border2:#2e2e36;
+  --text:#e2e0da;
+  --muted:#5a5860;
+  --dim:#2a2a32;
+  --root:#c0392b;
+  --root-glow:rgba(192,57,43,0.25);
+  --third:#1a6fa8;
+  --fifth:#1d8a4e;
+  --scale:#44444e;
+  --mono:'Space Mono',monospace;
+  --sans:'Inter',sans-serif;
+}
+
+body {
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--sans);
+  min-height:100vh;
+}
+
+/* ── HEADER ── */
+.header {
+  padding:28px 20px 20px;
+  border-bottom:1px solid var(--border);
+  position:relative;
+  overflow:hidden;
+}
+.header::after {
+  content:'7STR';
+  position:absolute;
+  right:-4px;top:-8px;
+  font-family:var(--mono);
+  font-size:72px;font-weight:700;
+  color:var(--border);
+  pointer-events:none;
+  user-select:none;
+  line-height:1;
+}
+.eyebrow {
+  font-family:var(--mono);
+  font-size:9px;letter-spacing:0.25em;
+  text-transform:uppercase;
+  color:var(--muted);
+  margin-bottom:6px;
+}
+h1 {
+  font-family:var(--mono);
+  font-size:18px;font-weight:700;
+  line-height:1.2;margin-bottom:4px;
+}
+.header-sub { font-size:12px;color:var(--muted); }
+
+/* ── KEY SELECTOR ── */
+.key-section { padding:16px 20px; border-bottom:1px solid var(--border); }
+.key-label {
+  font-family:var(--mono);font-size:9px;
+  letter-spacing:0.2em;text-transform:uppercase;
+  color:var(--muted);margin-bottom:10px;
+}
+.key-grid {
+  display:grid;
+  grid-template-columns:repeat(6,1fr);
+  gap:6px;
+}
+.key-btn {
+  font-family:var(--mono);font-size:11px;font-weight:700;
+  padding:10px 4px;
+  background:var(--surface);
+  border:1px solid var(--border);
+  color:var(--muted);
+  cursor:pointer;
+  transition:all 0.12s;
+  text-align:center;
+  line-height:1;
+}
+.key-btn:hover { border-color:var(--border2);color:var(--text); }
+.key-btn.active {
+  background:var(--root);
+  border-color:var(--root);
+  color:#fff;
+}
+.key-btn .enharmonic {
+  display:block;font-size:8px;
+  margin-top:2px;color:inherit;opacity:0.6;
+}
+
+/* ── MODE SELECTOR ── */
+.mode-section {
+  display:flex;gap:0;
+  border-bottom:1px solid var(--border);
+}
+.mode-btn {
+  flex:1;
+  font-family:var(--mono);font-size:9px;
+  letter-spacing:0.08em;text-transform:uppercase;
+  padding:10px 4px;
+  background:transparent;
+  border:none;border-right:1px solid var(--border);
+  color:var(--muted);
+  cursor:pointer;
+  transition:all 0.12s;
+  text-align:center;
+}
+.mode-btn:last-child{border-right:none}
+.mode-btn:hover{color:var(--text);background:var(--surface)}
+.mode-btn.active{color:var(--text);background:var(--surface2);border-bottom:2px solid var(--third)}
+
+/* ── POSITION SELECTOR ── */
+.pos-section {
+  display:flex;gap:0;
+  border-bottom:1px solid var(--border);
+  overflow-x:auto;
+  scrollbar-width:none;
+}
+.pos-section::-webkit-scrollbar{display:none}
+.pos-btn {
+  flex-shrink:0;
+  font-family:var(--mono);font-size:9px;
+  letter-spacing:0.08em;text-transform:uppercase;
+  padding:10px 14px;
+  background:transparent;
+  border:none;border-right:1px solid var(--border);
+  color:var(--muted);
+  cursor:pointer;
+  transition:all 0.12s;
+  white-space:nowrap;
+}
+.pos-btn:last-child{border-right:none}
+.pos-btn:hover{color:var(--text)}
+.pos-btn.active{color:var(--text);background:var(--surface2)}
+
+/* ── FRETBOARD ── */
+.fb-wrap {
+  padding:16px 20px 8px;
+  overflow-x:auto;
+  scrollbar-width:thin;
+  scrollbar-color:var(--border) transparent;
+}
+.fb-wrap::-webkit-scrollbar{height:4px}
+.fb-wrap::-webkit-scrollbar-track{background:transparent}
+.fb-wrap::-webkit-scrollbar-thumb{background:var(--border)}
+
+.fretboard {
+  min-width:640px;
+  position:relative;
+}
+
+.fret-numbers {
+  display:flex;
+  padding-left:52px;
+  margin-bottom:6px;
+}
+.fret-num {
+  flex:1;text-align:center;
+  font-family:var(--mono);font-size:9px;
+  color:var(--muted);
+}
+.fret-num.marker { color:var(--border2); }
+
+.string-row {
+  display:flex;align-items:center;
+  height:42px;position:relative;
+}
+
+.str-label {
+  width:48px;flex-shrink:0;
+  text-align:right;padding-right:10px;
+  font-family:var(--mono);font-size:10px;
+  color:var(--muted);
+  line-height:1.2;
+}
+.str-label small {
+  display:block;font-size:8px;color:#383840;
+}
+
+.str-track {
+  flex:1;position:relative;
+  height:100%;display:flex;align-items:center;
+}
+
+/* string line — thickness by string */
+.str-line {
+  position:absolute;left:0;right:0;top:50%;
+  transform:translateY(-50%);
+  background:var(--border2);
+  pointer-events:none;
+}
+.string-row:nth-child(2) .str-line{height:1px}
+.string-row:nth-child(3) .str-line{height:1.5px}
+.string-row:nth-child(4) .str-line{height:2px}
+.string-row:nth-child(5) .str-line{height:2.5px}
+.string-row:nth-child(6) .str-line{height:3px}
+.string-row:nth-child(7) .str-line{height:3.5px}
+.string-row:nth-child(8) .str-line{height:4.5px;background:#333340}
+
+.fret-cells {
+  display:flex;flex:1;
+  height:100%;position:relative;z-index:1;
+}
+.fret-cell {
+  flex:1;display:flex;
+  align-items:center;justify-content:center;
+  position:relative;
+}
+.fret-cell::before {
+  content:'';
+  position:absolute;left:0;top:6px;bottom:6px;
+  width:1px;background:var(--border);
+}
+.fret-cell:first-child::before{display:none}
+
+/* NUT (fret 0) */
+.fret-cell.nut::before {
+  width:3px;background:#4a4a58;left:-1px;
+}
+
+.dot {
+  width:28px;height:28px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:8px;font-weight:700;
+  position:relative;z-index:2;
+  transition:all 0.15s;
+  letter-spacing:0;flex-shrink:0;
+}
+.dot.root {
+  background:var(--root);color:#fff;
+  box-shadow:0 0 10px var(--root-glow);
+}
+.dot.third{background:var(--third);color:#fff}
+.dot.fifth{background:var(--fifth);color:#fff}
+.dot.scale{background:#252530;color:#555;width:22px;height:22px;font-size:7px}
+.dot.out{display:none}
+
+/* fretboard position range highlight */
+.fret-cell.in-range { background:rgba(255,255,255,0.015); }
+
+/* ── INFO PANEL ── */
+.info-panel {
+  margin:0 20px 16px;
+  padding:14px 16px;
+  background:var(--surface);
+  border:1px solid var(--border);
+  display:grid;
+  grid-template-columns:auto 1fr;
+  gap:16px;align-items:start;
+}
+.info-shape {
+  font-family:var(--mono);
+  font-size:28px;font-weight:700;
+  color:var(--text);
+  line-height:1;
+  padding-right:16px;
+  border-right:1px solid var(--border);
+}
+.info-shape small {
+  display:block;font-size:9px;
+  color:var(--muted);margin-top:3px;
+  letter-spacing:0.1em;text-transform:uppercase;
+}
+.info-details { font-size:12px;color:var(--muted);line-height:1.7; }
+.info-details strong { color:var(--text);font-weight:500; }
+
+/* ── LEGEND ── */
+.legend {
+  display:flex;gap:20px;flex-wrap:wrap;
+  padding:0 20px 16px;
+}
+.leg-item {
+  display:flex;align-items:center;gap:7px;
+  font-size:11px;color:var(--muted);
+}
+.leg-dot {
+  width:14px;height:14px;border-radius:50%;flex-shrink:0;
+}
+
+/* ── SCALE NOTES BAR ── */
+.scale-bar {
+  margin:0 20px 20px;
+  padding:12px 14px;
+  background:var(--surface);
+  border:1px solid var(--border);
+}
+.scale-bar-label {
+  font-family:var(--mono);font-size:9px;
+  letter-spacing:0.15em;text-transform:uppercase;
+  color:var(--muted);margin-bottom:8px;
+}
+.scale-notes {
+  display:flex;gap:6px;flex-wrap:wrap;
+}
+.scale-note {
+  font-family:var(--mono);font-size:11px;font-weight:700;
+  padding:4px 9px;
+  background:var(--bg);
+  border:1px solid var(--border);
+  color:var(--muted);
+}
+.scale-note.is-root{background:var(--root);border-color:var(--root);color:#fff}
+.scale-note.is-third{background:var(--third);border-color:var(--third);color:#fff}
+.scale-note.is-fifth{background:var(--fifth);border-color:var(--fifth);color:#fff}
+
+/* ── STUDY TIP ── */
+.tip {
+  margin:0 20px 28px;
+  border-left:2px solid var(--border);
+  padding:10px 14px;
+  font-size:12px;color:var(--muted);line-height:1.7;
+}
+.tip strong{color:var(--text);font-weight:500}
+
+@media(max-width:420px){
+  .key-grid{grid-template-columns:repeat(4,1fr)}
+  .info-panel{grid-template-columns:1fr}
+  .info-shape{border-right:none;border-bottom:1px solid var(--border);padding-bottom:10px}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="eyebrow">Full Reference · Drop A Tuning</div>
+  <h1>CAGED System<br>All 12 Keys — 7-String</h1>
+  <p class="header-sub">Natural Minor (Aeolian) · e B G D A E A · Frets 0–15</p>
+</div>
+
+<!-- KEY SELECTOR -->
+<div class="key-section">
+  <div class="key-label">Select a root key</div>
+  <div class="key-grid" id="keyGrid"></div>
+</div>
+
+<!-- MODE SELECTOR -->
+<div class="mode-section">
+  <button class="mode-btn active" onclick="setMode('minor')">Natural Minor</button>
+  <button class="mode-btn" onclick="setMode('major')">Major</button>
+  <button class="mode-btn" onclick="setMode('phrygian')">Phrygian Dom</button>
+  <button class="mode-btn" onclick="setMode('pentatonic')">Minor Penta</button>
+</div>
+
+<!-- POSITION SELECTOR -->
+<div class="pos-section" id="posSection"></div>
+
+<!-- FRETBOARD -->
+<div class="fb-wrap">
+  <div class="fretboard" id="fretboard"></div>
+</div>
+
+<!-- INFO PANEL -->
+<div class="info-panel" id="infoPanel">
+  <div class="info-shape" id="infoShape">—<small>shape</small></div>
+  <div class="info-details" id="infoDetails">Select a key and position above.</div>
+</div>
+
+<!-- SCALE NOTES -->
+<div class="scale-bar">
+  <div class="scale-bar-label">Scale notes in this key</div>
+  <div class="scale-notes" id="scaleNotes"></div>
+</div>
+
+<!-- LEGEND -->
+<div class="legend">
+  <div class="leg-item"><div class="leg-dot" style="background:var(--root)"></div>Root</div>
+  <div class="leg-item"><div class="leg-dot" style="background:var(--third)"></div>3rd</div>
+  <div class="leg-item"><div class="leg-dot" style="background:var(--fifth)"></div>5th</div>
+  <div class="leg-item"><div class="leg-dot" style="background:#252530;border:1px solid #333"></div>Scale tone</div>
+</div>
+
+<!-- TIP -->
+<div class="tip" id="studyTip"></div>
+
+<script>
+// ── DATA ──────────────────────────────────────────────────────────────────
+
+const NOTE_NAMES = ['A','A#/Bb','B','C','C#/Db','D','D#/Eb','E','F','F#/Gb','G','G#/Ab'];
+const NOTE_SHORT = ['A','Bb','B','C','C#','D','Eb','E','F','F#','G','Ab'];
+const NOTE_DISPLAY = ['A','A♯/B♭','B','C','C♯/D♭','D','D♯/E♭','E','F','F♯/G♭','G','G♯/A♭'];
+
+// Drop A 7-string open notes as semitones from A (0=A)
+// Strings high to low: e(7) B(2) G(10) D(5) A(0) E(7) A(0)
+const OPEN = [7, 2, 10, 5, 0, 7, 0];
+const STR_NAMES = ['e','B','G','D','A','E','A₇'];
+const STR_DESC  = ['high','','','','','low','7th'];
+
+// Mode interval sets (semitones from root)
+const MODES = {
+  minor:      [0,2,3,5,7,8,10],
+  major:      [0,2,4,5,7,9,11],
+  phrygian:   [0,1,4,5,7,8,10], // Phrygian dominant
+  pentatonic: [0,3,5,7,10],
+};
+
+const MODE_NAMES = {
+  minor:'Natural Minor',major:'Major',
+  phrygian:'Phrygian Dominant',pentatonic:'Minor Pentatonic'
+};
+
+// Role within the scale (for coloring)
+// returns 'root','third','fifth','scale' or null
+function noteRole(semitone, rootIdx, mode) {
+  const intervals = MODES[mode];
+  const rel = ((semitone - rootIdx) % 12 + 12) % 12;
+  if (!intervals.includes(rel)) return null;
+  if (rel === 0) return 'root';
+  // 3rd: index 2 in most modes
+  if (rel === intervals[2]) return 'third';
+  // 5th: always 7 semitones up (perfect fifth)
+  if (rel === 7) return 'fifth';
+  return 'scale';
+}
+
+// CAGED positions: for each shape, fret window relative to root position
+// Each position: { shape, fretOffset, span, description, tip }
+// fretOffset: where root on string 5 (A) sits relative to the shape anchor fret
+// We calculate actual frets dynamically per key
+
+// For any key rooted at fret R on string 5 (A string):
+// The 5 CAGED windows are at:
+// E-shape: R (root on A str fret R, barre at R-2 roughly)
+// D-shape: R+3
+// C-shape: R+5
+// A-shape: R+7
+// G-shape: R+10 (or R-2)
+
+// We'll define positions as fret windows [start, end] relative to root fret on string 5
+const CAGED_POSITIONS = [
+  {
+    id:0, shape:'E',
+    winStart: (r)=> Math.max(0, r-1),
+    winEnd:   (r)=> r+3,
+    description:(key,mode)=>`The home base position. Root sits on string 5 at the anchor fret. Your chug riff and main rhythm patterns live here. Most natural starting point for any key.`,
+    tip:(key)=>`String 7 gives you the same root one octave lower — use it as the foundation beneath anything happening in this position.`
+  },
+  {
+    id:1, shape:'D',
+    winStart: (r)=> r+2,
+    winEnd:   (r)=> r+6,
+    description:(key,mode)=>`Shifts up 3 frets from the E-shape. Great for melodic lines on strings 1–3, tremolo picking, and the first "upper neck" riff zone. Connects to E-shape via fret overlap.`,
+    tip:(key)=>`The handoff from E-shape to D-shape happens where the windows overlap. Hammer into this position from the top of the E-shape without stopping.`
+  },
+  {
+    id:2, shape:'C',
+    winStart: (r)=> r+4,
+    winEnd:   (r)=> r+8,
+    description:(key,mode)=>`Mid-neck. Bends and vibrato feel better here. This is where leads start sounding expressive rather than mechanical. Pinch harmonics scream from this zone.`,
+    tip:(key)=>`Start a riff here and resolve downward into the D-shape. Descending motion from position 3 to 2 creates natural tension release.`
+  },
+  {
+    id:3, shape:'A',
+    winStart: (r)=> r+7,
+    winEnd:   (r)=> r+11,
+    description:(key,mode)=>`Upper neck. Brighter, more cutting, almost desperate-sounding — especially on strings 1–2. This is where Deafheaven and blackened deathcore guitar lives. Often neglected on 7-strings.`,
+    tip:(key)=>`Force yourself to start riffs here and descend. Going high → low creates momentum and makes the low A hit harder when you return to it.`
+  },
+  {
+    id:4, shape:'G',
+    winStart: (r)=> Math.max(0, r-3),
+    winEnd:   (r)=> r+1,
+    description:(key,mode)=>`Wraps around below the E-shape. Good for open-string pull-offs, lower position melodic ideas, and connecting back to open. Feels almost folk-like until you add distortion.`,
+    tip:(key)=>`G-shape + E-shape together give you a wide low-to-mid stretch. Great for riffs that start open/low and climb into the main box position.`
+  },
+];
+
+// Find root fret on string 5 (A string, index 4, open=A=0) for a given root note
+function rootFretOnStr5(rootSemitone) {
+  // string 5 is open A (0). Root fret = rootSemitone
+  // but keep it in range 0-15
+  let f = rootSemitone % 12;
+  // for keys that would start below open, push up an octave
+  return f; // 0-11
+}
+
+// ── STATE ────────────────────────────────────────────────────────────────
+let state = { key:0, mode:'minor', pos:0 };
+
+// ── BUILD KEY GRID ────────────────────────────────────────────────────────
+function buildKeyGrid() {
+  const grid = document.getElementById('keyGrid');
+  grid.innerHTML = '';
+  NOTE_NAMES.forEach((name, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'key-btn' + (i===0?' active':'');
+    const parts = name.split('/');
+    btn.innerHTML = parts[0] + (parts[1]?`<span class="enharmonic">${parts[1]}</span>`:'');
+    btn.onclick = ()=>{ state.key=i; state.pos=0; render(); };
+    grid.appendChild(btn);
+  });
+}
+
+// ── BUILD POS TABS ────────────────────────────────────────────────────────
+function buildPosTabs() {
+  const sec = document.getElementById('posSection');
+  sec.innerHTML = '';
+  CAGED_POSITIONS.forEach((p,i)=>{
+    const btn = document.createElement('button');
+    btn.className = 'pos-btn' + (i===0?' active':'');
+    btn.textContent = `Pos ${i+1} (${p.shape})`;
+    btn.onclick = ()=>{ state.pos=i; render(); };
+    sec.appendChild(btn);
+  });
+}
+
+// ── SET MODE ──────────────────────────────────────────────────────────────
+function setMode(m) {
+  state.mode = m;
+  state.pos = 0;
+  document.querySelectorAll('.mode-btn').forEach((b,i)=>{
+    b.classList.toggle('active', b.textContent.toLowerCase().includes(m.substring(0,4).toLowerCase()) || (m==='phrygian'&&b.textContent.includes('Phrygian')) || (m==='pentatonic'&&b.textContent.includes('Penta')));
+  });
+  render();
+}
+
+// ── RENDER ────────────────────────────────────────────────────────────────
+function render() {
+  const { key, mode, pos } = state;
+  const rootSemitone = key;
+  const intervals = MODES[mode];
+  const posData = CAGED_POSITIONS[pos];
+
+  // Get root fret on string 5 for this key
+  const rootFret = rootFretOnStr5(rootSemitone);
+  // If rootFret is 0 and shape needs negative frets, bump up 12
+  let effectiveRoot = rootFret;
+  if (posData.winStart(effectiveRoot) < 0) effectiveRoot += 12;
+
+  const winStart = posData.winStart(effectiveRoot);
+  const winEnd = posData.winEnd(effectiveRoot);
+
+  // Show frets: 2 below winStart to 2 above winEnd, clamped
+  const showStart = Math.max(0, winStart - 1);
+  const showEnd   = Math.min(15, winEnd + 1);
+
+  // Update key buttons
+  document.querySelectorAll('.key-btn').forEach((b,i)=>b.classList.toggle('active',i===key));
+  // Update pos buttons
+  document.querySelectorAll('.pos-btn').forEach((b,i)=>b.classList.toggle('active',i===pos));
+
+  // ── FRETBOARD ──
+  let html = '';
+
+  // Fret numbers row
+  html += '<div class="fret-numbers">';
+  for(let f=showStart;f<=showEnd;f++){
+    const isM=[0,3,5,7,9,12,15].includes(f);
+    html+=`<div class="fret-num${isM?' marker':''}">${f===0?'○':f}</div>`;
+  }
+  html += '</div>';
+
+  // String rows
+  for(let s=0;s<7;s++){
+    const openNote = OPEN[s];
+    const isStr7 = s===6;
+    html += `<div class="string-row">`;
+    html += `<div class="str-label">${STR_NAMES[s]}<small>${STR_DESC[s]}</small></div>`;
+    html += `<div class="str-track"><div class="str-line"></div><div class="fret-cells">`;
+
+    for(let f=showStart;f<=showEnd;f++){
+      const semitone = (openNote + f) % 12;
+      const role = noteRole(semitone, rootSemitone, mode);
+      const inWin = f >= winStart && f <= winEnd;
+
+      // On str7, always show root notes as context anchors
+      const isStr7Root = isStr7 && role === 'root';
+      const shouldShow = role && (inWin || isStr7Root);
+
+      const isNut = f===0;
+      html += `<div class="fret-cell${isNut?' nut':''}${inWin?' in-range':''}">`;
+
+      if(shouldShow){
+        const noteName = NOTE_SHORT[semitone];
+        const cls = role; // root/third/fifth/scale
+        html += `<div class="dot ${cls}">${role==='scale'?'·':noteName}</div>`;
+      }
+      html += `</div>`;
+    }
+    html += `</div></div></div>`;
+  }
+
+  document.getElementById('fretboard').innerHTML = html;
+
+  // ── INFO PANEL ──
+  const keyName = NOTE_SHORT[key];
+  document.getElementById('infoShape').innerHTML =
+    `${posData.shape}<small>shape · pos ${pos+1}</small>`;
+  document.getElementById('infoDetails').innerHTML =
+    `<strong>${keyName} ${MODE_NAMES[mode]} — Position ${pos+1} (${posData.shape}-shape)</strong><br>
+     Frets ${winStart}–${winEnd} on strings 1–6 &nbsp;·&nbsp; String 7 shows root anchors throughout<br><br>
+     ${posData.description(keyName, mode)}`;
+
+  // ── SCALE NOTES BAR ──
+  const scaleDiv = document.getElementById('scaleNotes');
+  scaleDiv.innerHTML = '';
+  intervals.forEach(interval => {
+    const noteIdx = (rootSemitone + interval) % 12;
+    const name = NOTE_SHORT[noteIdx];
+    const role = interval===0?'root':interval===intervals[2]?'third':interval===7?'fifth':'';
+    const span = document.createElement('span');
+    span.className = 'scale-note' + (role?` is-${role}`:'');
+    span.textContent = name;
+    scaleDiv.appendChild(span);
+  });
+
+  // ── TIP ──
+  document.getElementById('studyTip').innerHTML =
+    `<strong>Practice tip:</strong> ${posData.tip(keyName)} &nbsp;·&nbsp; <strong>Key context:</strong> In ${keyName} ${MODE_NAMES[mode]}, your tritone (the "devil interval") is ${NOTE_SHORT[(rootSemitone+6)%12]}. That's the most dissonant note you can hit against this root.`;
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────
+buildKeyGrid();
+buildPosTabs();
+render();
+</script>
+</body>
+</html>

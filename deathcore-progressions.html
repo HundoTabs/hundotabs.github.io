@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Deathcore Progressions — Drop A / 7-String</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Inter:wght@300;400;500;600&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root {
+  --bg:#09090b;
+  --surface:#111115;
+  --surface2:#17171c;
+  --border:#21212a;
+  --border2:#2e2e3a;
+  --text:#e0deda;
+  --muted:#58566a;
+  --red:#b83228;
+  --red-dim:rgba(184,50,40,0.15);
+  --blue:#1a6fa8;
+  --green:#1a7a48;
+  --amber:#a07020;
+  --purple:#6040b0;
+  --mono:'Space Mono',monospace;
+  --sans:'Inter',sans-serif;
+}
+
+body { background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh; }
+
+/* HEADER */
+.header {
+  padding:28px 20px 20px;
+  border-bottom:1px solid var(--border);
+  position:relative;overflow:hidden;
+}
+.header::after {
+  content:'PROG';
+  position:absolute;right:-6px;top:-10px;
+  font-family:var(--mono);font-size:80px;font-weight:700;
+  color:var(--border);pointer-events:none;user-select:none;line-height:1;
+}
+.eyebrow {
+  font-family:var(--mono);font-size:9px;letter-spacing:0.25em;
+  text-transform:uppercase;color:var(--muted);margin-bottom:6px;
+}
+h1 { font-family:var(--mono);font-size:18px;font-weight:700;line-height:1.2;margin-bottom:4px; }
+.header-sub { font-size:12px;color:var(--muted); }
+
+/* KEY STRIP */
+.key-strip {
+  padding:12px 20px;
+  border-bottom:1px solid var(--border);
+}
+.key-label { font-family:var(--mono);font-size:9px;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);margin-bottom:8px; }
+.key-grid { display:grid;grid-template-columns:repeat(6,1fr);gap:5px; }
+.key-btn {
+  font-family:var(--mono);font-size:11px;font-weight:700;
+  padding:9px 4px;background:var(--surface);
+  border:1px solid var(--border);color:var(--muted);
+  cursor:pointer;transition:all 0.12s;text-align:center;
+}
+.key-btn:hover{border-color:var(--border2);color:var(--text)}
+.key-btn.active{background:var(--red);border-color:var(--red);color:#fff}
+.key-btn small{display:block;font-size:8px;opacity:0.6;margin-top:1px}
+
+/* PROGRESSION LIST */
+.prog-list { padding:16px 20px 0; }
+.prog-label { font-family:var(--mono);font-size:9px;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);margin-bottom:10px; }
+
+.prog-card {
+  background:var(--surface);
+  border:1px solid var(--border);
+  margin-bottom:10px;
+  cursor:pointer;
+  transition:border-color 0.12s;
+}
+.prog-card:hover { border-color:var(--border2); }
+.prog-card.active { border-color:var(--red); }
+
+.prog-header {
+  display:flex;align-items:center;gap:10px;
+  padding:12px 14px;
+}
+.prog-tag {
+  font-family:var(--mono);font-size:8px;letter-spacing:0.08em;
+  text-transform:uppercase;padding:3px 7px;flex-shrink:0;
+}
+.tag-brutal   { background:rgba(184,50,40,0.2);color:#e06050; }
+.tag-melodic  { background:rgba(26,111,168,0.2);color:#50a0d8; }
+.tag-doom     { background:rgba(96,64,176,0.2);color:#a080e0; }
+.tag-tech     { background:rgba(26,122,72,0.2);color:#40c080; }
+.tag-hybrid   { background:rgba(160,112,32,0.2);color:#d09040; }
+
+.prog-name { font-size:13px;font-weight:500;color:var(--text);flex:1; }
+.prog-roman {
+  font-family:var(--mono);font-size:11px;color:var(--muted);
+  flex-shrink:0;letter-spacing:0.05em;
+}
+.chevron { font-size:9px;color:var(--muted);transition:transform 0.15s;flex-shrink:0; }
+.prog-card.active .chevron { transform:rotate(180deg); }
+
+.prog-body { display:none;border-top:1px solid var(--border); }
+.prog-card.active .prog-body { display:block; }
+
+/* LANDMARK STRIP */
+.landmarks {
+  display:flex;gap:0;
+  border-bottom:1px solid var(--border);
+  overflow-x:auto;scrollbar-width:none;
+}
+.landmarks::-webkit-scrollbar{display:none}
+.landmark {
+  flex:1;min-width:60px;
+  padding:10px 8px;
+  text-align:center;
+  border-right:1px solid var(--border);
+  position:relative;
+}
+.landmark:last-child{border-right:none}
+.lm-roman {
+  font-family:var(--mono);font-size:13px;font-weight:700;
+  color:var(--text);display:block;margin-bottom:2px;
+}
+.lm-note {
+  font-family:var(--mono);font-size:10px;
+  color:var(--red);display:block;margin-bottom:2px;
+}
+.lm-feel { font-size:9px;color:var(--muted);display:block; }
+.landmark.home { background:var(--red-dim); }
+.landmark.home .lm-roman { color:var(--red); }
+
+/* FRET MAP */
+.fret-section { padding:14px 16px; border-bottom:1px solid var(--border); }
+.fret-section-label {
+  font-family:var(--mono);font-size:9px;letter-spacing:0.15em;
+  text-transform:uppercase;color:var(--muted);margin-bottom:10px;
+}
+.fret-map { overflow-x:auto;scrollbar-width:thin;scrollbar-color:var(--border) transparent; }
+.fret-map::-webkit-scrollbar{height:3px}
+.fret-map::-webkit-scrollbar-thumb{background:var(--border)}
+
+.fretboard { min-width:560px;position:relative; }
+.fret-nums { display:flex;padding-left:44px;margin-bottom:4px; }
+.fret-num { flex:1;text-align:center;font-family:var(--mono);font-size:8px;color:var(--muted); }
+.fret-num.mk{color:var(--border2)}
+
+.str-row { display:flex;align-items:center;height:36px;position:relative; }
+.str-lbl {
+  width:40px;flex-shrink:0;text-align:right;padding-right:8px;
+  font-family:var(--mono);font-size:9px;color:var(--muted);
+}
+.str-track { flex:1;position:relative;height:100%;display:flex;align-items:center; }
+.str-line {
+  position:absolute;left:0;right:0;top:50%;
+  transform:translateY(-50%);background:var(--border2);pointer-events:none;
+}
+.str-row:nth-child(2) .str-line{height:1px}
+.str-row:nth-child(3) .str-line{height:1.5px}
+.str-row:nth-child(4) .str-line{height:2px}
+.str-row:nth-child(5) .str-line{height:2.5px}
+.str-row:nth-child(6) .str-line{height:3px}
+.str-row:nth-child(7) .str-line{height:3.5px}
+.str-row:nth-child(8) .str-line{height:4px;background:#303038}
+
+.fcells { display:flex;flex:1;height:100%;position:relative;z-index:1; }
+.fcell { flex:1;display:flex;align-items:center;justify-content:center;position:relative; }
+.fcell::before{content:'';position:absolute;left:0;top:5px;bottom:5px;width:1px;background:var(--border)}
+.fcell:first-child::before{display:none}
+.fcell.nut::before{width:3px;background:#404050;left:-1px}
+
+.ndot {
+  width:24px;height:24px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:7px;font-weight:700;
+  position:relative;z-index:2;flex-shrink:0;
+}
+.ndot.root { background:var(--red);color:#fff;box-shadow:0 0 8px rgba(184,50,40,0.4); }
+.ndot.fifth { background:var(--green);color:#fff; }
+.ndot.third { background:var(--blue);color:#fff; }
+.ndot.other { background:#222230;color:#444;width:18px;height:18px;font-size:6px; }
+
+/* RIFF IDEA */
+.riff-section { padding:14px 16px;border-bottom:1px solid var(--border); }
+.riff-label { font-family:var(--mono);font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);margin-bottom:8px; }
+.tab-block {
+  font-family:var(--mono);font-size:9px;
+  background:var(--bg);border:1px solid var(--border);
+  padding:10px 12px;overflow-x:auto;white-space:pre;
+  line-height:1.8;color:#666;scrollbar-width:thin;
+}
+.tab-block::-webkit-scrollbar{height:3px}
+.tab-block .hl{color:#c0392b}
+.tab-block .co{color:#3a5a3a}
+
+/* FEEL + CONTEXT */
+.context-section { padding:14px 16px; }
+.context-grid { display:grid;grid-template-columns:1fr 1fr;gap:12px; }
+.ctx-block h4 { font-family:var(--mono);font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-bottom:6px; }
+.ctx-block p { font-size:11px;color:var(--muted);line-height:1.7; }
+.ctx-block p strong { color:var(--text);font-weight:500; }
+.ref-tags { display:flex;gap:6px;flex-wrap:wrap; }
+.ref-tag {
+  font-family:var(--mono);font-size:9px;
+  padding:3px 7px;background:var(--surface2);
+  border:1px solid var(--border);color:var(--muted);
+}
+
+/* BOTTOM PAD */
+.bottom-pad { height:40px; }
+
+@media(max-width:380px){
+  .key-grid{grid-template-columns:repeat(4,1fr)}
+  .context-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="eyebrow">Drop A · 7-String · A minor root</div>
+  <h1>Deathcore Progressions<br>Root Note Reference</h1>
+  <p class="header-sub">Landmarks only — the notes between are yours · Change key to transpose everything</p>
+</div>
+
+<div class="key-strip">
+  <div class="key-label">Root key</div>
+  <div class="key-grid" id="keyGrid"></div>
+</div>
+
+<div class="prog-list">
+  <div class="prog-label">Progressions — tap to expand</div>
+  <div id="progCards"></div>
+</div>
+
+<div class="bottom-pad"></div>
+
+<script>
+// ── NOTE DATA ─────────────────────────────────────────────────────────────
+const NOTES = ['A','Bb','B','C','C#','D','Eb','E','F','F#','G','Ab'];
+// Drop A 7-string open notes (semitones from A=0), high to low
+const OPEN  = [7,2,10,5,0,7,0];
+const SNAMES = ['e','B','G','D','A','E','A₇'];
+
+// Interval qualities in natural minor
+// semitone offset from root → { roman, quality, feel }
+const INTERVAL_INFO = {
+  0:  { r:'i',   q:'min', feel:'home / anchor' },
+  2:  { r:'ii°', q:'dim', feel:'unstable, passing' },
+  3:  { r:'III', q:'maj', feel:'lift, brightness' },
+  5:  { r:'iv',  q:'min', feel:'dark, heavy' },
+  7:  { r:'v',   q:'min', feel:'tension, open' },
+  8:  { r:'VI',  q:'maj', feel:'melancholic' },
+  10: { r:'VII', q:'maj', feel:'momentum, drive' },
+  6:  { r:'♭V',  q:'dim', feel:'devil interval / tritone' },
+  1:  { r:'♭II', q:'maj', feel:'phrygian menace' },
+};
+
+// ── PROGRESSIONS ──────────────────────────────────────────────────────────
+// intervals: semitone offsets from root, in order of the progression
+// tabTemplate: function(notes) => tab string with landmark notes shown
+const PROGRESSIONS = [
+  {
+    name: 'The Pit Opener',
+    tag: 'brutal', tagLabel: 'Brutal',
+    intervals: [0, 10, 8, 7],
+    feel: 'The workhorse deathcore progression. Starts on home, drops to VII for momentum, VI for that sad-heavy lift, then v holds tension before looping back. Every Angelmaker breakdown lives somewhere near this.',
+    refs: ['Angelmaker','Fit For An Autopsy','Knocked Loose'],
+    riff: (ns) => `<span class="co">; Landmarks: ${ns[0]}(i) → ${ns[1]}(VII) → ${ns[2]}(VI) → ${ns[3]}(v)</span>
+<span class="co">; Fill between with your chug motif — these are just the landing posts</span>
+A7 |<span class="hl">-0</span>-0-0-0-0-<span class="hl">--</span>--<span class="hl">--</span>--<span class="hl">--</span>--|
+E  |----------<span class="hl">${fret(5,ns[1])}</span>--<span class="hl">${fret(5,ns[2])}</span>--<span class="hl">${fret(5,ns[3])}</span>--|
+   <span class="co">; ^str6 carries the other landmarks if they're above open A</span>`,
+  },
+  {
+    name: 'Phrygian Menace',
+    tag: 'brutal', tagLabel: 'Brutal',
+    intervals: [0, 1, 0, 7],
+    feel: 'Uses the flat-2 (one fret above root) — that\'s the Phrygian move. Sounds ancient, sinister, almost Middle Eastern. Goes i → ♭II → i → v. The ♭II is a jab that resolves immediately back to root before dropping to v.',
+    refs: ['Carcosa','Lorna Shore','Shadow of Intent'],
+    riff: (ns) => `<span class="co">; i → ♭II (one fret up) → i → v</span>
+<span class="co">; The ♭II is a one-note stab, not a full chord. Just hit it and bounce back.</span>
+A7 |<span class="hl">-0</span>-0-0-<span class="hl">${fret(6,ns[1])}</span>-<span class="hl">-0</span>-0-0-0-<span class="hl">--</span>--|
+E  |-----------------------------<span class="hl">${fret(5,ns[3])}</span>--|
+   <span class="co">; That ♭II on str7 is just fret ${fret(6,ns[1])} — one fret above open</span>`,
+  },
+  {
+    name: 'The Relentless',
+    tag: 'tech', tagLabel: 'Tech',
+    intervals: [0, 7, 6, 0],
+    feel: 'i → v → ♭V (tritone) → i. The tritone (♭V) is your diabolus in musica — you already know this one. Starting from i, climbing to v, then stabbing the tritone before resolving back home. Creates that lurching, unresolved feeling even when it loops.',
+    refs: ['Netherwalker','Bleed From Within','Archspire'],
+    riff: (ns) => `<span class="co">; i → v → tritone(♭V) → i</span>
+<span class="co">; You already have this motion in your riff. This formalizes it.</span>
+A7 |<span class="hl">-0</span>-0-0-0-----------<span class="hl">-0</span>--|
+E  |--------<span class="hl">${fret(5,ns[1])}</span>---<span class="hl">${fret(5,ns[2])}</span>-------|
+   <span class="co">; v = fret ${fret(5,ns[1])} on str6, tritone = fret ${fret(5,ns[2])} on str6</span>`,
+  },
+  {
+    name: 'Dark Ascent',
+    tag: 'melodic', tagLabel: 'Melodic',
+    intervals: [0, 3, 5, 7],
+    feel: 'i → III → iv → v. Climbs upward through the minor scale landmarks. Each step feels like escalating dread. III gives a brief major brightness before iv pulls dark again, and v holds tension. Great for a verse that builds into a breakdown.',
+    refs: ['Carcosa','Chelsea Grin','The Acacia Strain'],
+    riff: (ns) => `<span class="co">; Climbing progression — each landmark one step up</span>
+<span class="co">; Play motif, land on III, motif, land on iv, motif, land on v, resolve</span>
+A7 |<span class="hl">-0</span>-0-0-0--------------------|
+D  |--------<span class="hl">${fret(3,ns[1])}</span>---<span class="hl">${fret(3,ns[2])}</span>---<span class="hl">${fret(3,ns[3])}</span>--|
+   <span class="co">; str4 (D) carries these cleanly without jumping far</span>`,
+  },
+  {
+    name: 'The Breakdown Cycle',
+    tag: 'doom', tagLabel: 'Doom',
+    intervals: [0, 8, 5, 7],
+    feel: 'i → VI → iv → v. The "sad but crushing" progression. VI has that melancholic major quality that hits hard in a minor context, iv drops back dark, v suspends. Loop this at half tempo with a snare on beat 3 only and it\'s a full breakdown section.',
+    refs: ['Emmure','Dying Fetus','Bodysnatcher'],
+    riff: (ns) => `<span class="co">; Half-time feel — slow and heavy, lots of space between landmarks</span>
+<span class="co">; i(home)————VI(lift)————iv(dark)————v(suspend)————</span>
+A7 |<span class="hl">-0</span>----0--------------------0---|
+E  |----------<span class="hl">${fret(5,ns[1])}</span>----<span class="hl">${fret(5,ns[2])}</span>----<span class="hl">${fret(5,ns[3])}</span>-|
+   <span class="co">; Space is the point here. Let each landmark breathe.</span>`,
+  },
+  {
+    name: 'Tech Spiral',
+    tag: 'tech', tagLabel: 'Tech',
+    intervals: [0, 10, 3, 8],
+    feel: 'i → VII → III → VI. Doesn\'t resolve cleanly — keeps moving in a way that never fully lands. VII has drive, III has that unexpected brightness, VI pulls melancholic. Great for a riff that feels like it\'s constantly accelerating forward with no brake.',
+    refs: ['Archspire','Cattle Decapitation','Rivers of Nihil'],
+    riff: (ns) => `<span class="co">; Never resolves — keeps spinning. Good for verse riffs that loop without breathing.</span>
+<span class="co">; i → VII → III → VI → (back to i)</span>
+A7 |<span class="hl">-0</span>-0-0-0-0-0--------------------|
+E  |-----------<span class="hl">${fret(5,ns[1])}</span>-------------------|
+D  |----------------<span class="hl">${fret(3,ns[2])}</span>---<span class="hl">${fret(3,ns[3])}</span>--|
+   <span class="co">; Split across strings — hand stays in one position, landmarks shift string</span>`,
+  },
+  {
+    name: 'Desolate Resolve',
+    tag: 'melodic', tagLabel: 'Melodic',
+    intervals: [5, 8, 7, 0],
+    feel: 'iv → VI → v → i. Starts AWAY from home and resolves TO it at the end. This is the "cinematic" move — building tension through the first three landmarks and finally landing on i feels like a weight dropping. Use this for a song\'s final riff before the outro.',
+    refs: ['Fit For An Autopsy','Norma Jean','Gojira'],
+    riff: (ns) => `<span class="co">; Starts on iv — notice i doesn't appear until the END</span>
+<span class="co">; iv(dark)————VI(lift)————v(tension)————i(LAND)</span>
+E  |<span class="hl">${fret(5,ns[0])}</span>---<span class="hl">${fret(5,ns[1])}</span>---<span class="hl">${fret(5,ns[2])}</span>---------|
+A7 |------------------------<span class="hl">-0</span>--|
+   <span class="co">; That final open A (i) hits harder because you waited for it</span>`,
+  },
+  {
+    name: 'The Blackened Spiral',
+    tag: 'hybrid', tagLabel: 'Hybrid',
+    intervals: [0, 1, 10, 8],
+    feel: 'i → ♭II → VII → VI. Black metal meets deathcore. The ♭II (Phrygian flat-2) gives it that raw, cold feeling before VII drives forward and VI pulls it melancholic. This is closer to Deafheaven territory — the "beautiful and crushing" sound.',
+    refs: ['Deafheaven','Veil of Maya','Misery Signals'],
+    riff: (ns) => `<span class="co">; Phrygian flavor bleeds into deathcore drive</span>
+<span class="co">; i → ♭II(cold stab) → VII(drive) → VI(melt)</span>
+A7 |<span class="hl">-0</span>-0-<span class="hl">${fret(6,ns[1])}</span>-0-0-0-----------0-|
+E  |--------------<span class="hl">${fret(5,ns[2])}</span>---<span class="hl">${fret(5,ns[3])}</span>----|
+   <span class="co">; ♭II is just fret ${fret(6,ns[1])} on str7 — one above open, quick stab back to i</span>`,
+  },
+];
+
+// ── HELPERS ───────────────────────────────────────────────────────────────
+let currentKey = 0;
+let openCard = null;
+
+function noteName(semitone) {
+  return NOTES[((semitone % 12) + 12) % 12];
+}
+
+// Find best fret for a note on a given string (0=high e, 6=low A7)
+// Returns fret 0-15 or -1 if not reachable cleanly
+function bestFret(strIdx, targetSemitone) {
+  const open = OPEN[strIdx];
+  let f = ((targetSemitone - open) % 12 + 12) % 12;
+  if (f > 15) f += 12;
+  return f <= 15 ? f : -1;
+}
+
+function fret(strIdx, targetSemitone) {
+  const f = bestFret(strIdx, targetSemitone);
+  return f === 0 ? '0' : f < 10 ? f.toString() : f.toString();
+}
+
+// Get actual note semitone from root + interval
+function noteFor(rootSemitone, interval) {
+  return (rootSemitone + interval) % 12;
+}
+
+// ── BUILD KEY GRID ────────────────────────────────────────────────────────
+function buildKeys() {
+  const g = document.getElementById('keyGrid');
+  g.innerHTML = '';
+  NOTES.forEach((n,i)=>{
+    const btn = document.createElement('button');
+    btn.className='key-btn'+(i===0?' active':'');
+    // enharmonic
+    const enh = {1:'A#',3:'C#/Db',6:'D#/Eb',8:'F#/Gb',11:'G#/Ab'};
+    btn.innerHTML = n + (enh[i]?`<small>${enh[i]}</small>`:'<small>&nbsp;</small>');
+    btn.onclick=()=>{ currentKey=i; openCard=null; buildCards(); updateKeys(); };
+    g.appendChild(btn);
+  });
+}
+
+function updateKeys() {
+  document.querySelectorAll('.key-btn').forEach((b,i)=>b.classList.toggle('active',i===currentKey));
+}
+
+// ── BUILD PROGRESSION CARDS ───────────────────────────────────────────────
+function buildCards() {
+  const container = document.getElementById('progCards');
+  container.innerHTML = '';
+
+  PROGRESSIONS.forEach((prog, pi) => {
+    const notesSemitones = prog.intervals.map(iv => noteFor(currentKey, iv));
+    const noteNames = notesSemitones.map(s => noteName(s));
+
+    const card = document.createElement('div');
+    card.className = 'prog-card' + (openCard===pi?' active':'');
+
+    // Roman numeral string
+    const romanStr = prog.intervals.map(iv => INTERVAL_INFO[iv]?.r || '?').join(' → ');
+
+    card.innerHTML = `
+      <div class="prog-header" onclick="toggleCard(${pi})">
+        <span class="prog-tag tag-${prog.tag}">${prog.tagLabel}</span>
+        <span class="prog-name">${prog.name}</span>
+        <span class="prog-roman">${romanStr}</span>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="prog-body">
+        ${buildLandmarks(prog, noteNames, notesSemitones)}
+        ${buildFretMap(prog, notesSemitones)}
+        ${buildRiff(prog, notesSemitones)}
+        ${buildContext(prog, noteNames, romanStr)}
+      </div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+function buildLandmarks(prog, noteNames, notesSemitones) {
+  let html = '<div class="landmarks">';
+  prog.intervals.forEach((iv, i) => {
+    const info = INTERVAL_INFO[iv] || {r:'?',feel:'?'};
+    const isHome = iv === 0;
+    html += `<div class="landmark${isHome?' home':''}">
+      <span class="lm-roman">${info.r}</span>
+      <span class="lm-note">${noteNames[i]}</span>
+      <span class="lm-feel">${info.feel}</span>
+    </div>`;
+  });
+  html += '</div>';
+  return html;
+}
+
+function buildFretMap(prog, notesSemitones) {
+  const SHOW_FRETS = 13; // 0-12
+  let html = `<div class="fret-section">
+    <div class="fret-section-label">Root notes on neck — all landmarks shown</div>
+    <div class="fret-map"><div class="fretboard">`;
+
+  // Fret numbers
+  html += '<div class="fret-nums">';
+  for(let f=0;f<=SHOW_FRETS;f++){
+    const mk=[0,3,5,7,9,12].includes(f);
+    html+=`<div class="fret-num${mk?' mk':''}">${f===0?'○':f}</div>`;
+  }
+  html += '</div>';
+
+  // Strings
+  for(let s=0;s<7;s++){
+    html += `<div class="str-row"><div class="str-lbl">${SNAMES[s]}</div>
+      <div class="str-track"><div class="str-line"></div><div class="fcells">`;
+
+    for(let f=0;f<=SHOW_FRETS;f++){
+      const semitone = (OPEN[s]+f)%12;
+      // Check if this note is one of our landmarks
+      const landmarkIdx = notesSemitones.indexOf(semitone);
+      const isRoot = semitone === notesSemitones[0];
+      // interval from root
+      const iv = prog.intervals[landmarkIdx];
+      let dotClass = '';
+      let label = '';
+
+      if(landmarkIdx !== -1){
+        const info = INTERVAL_INFO[iv] || {};
+        if(iv===0){ dotClass='root'; label=NOTES[semitone]; }
+        else if(iv===7){ dotClass='fifth'; label=NOTES[semitone]; }
+        else if([3,5,8,10,3].includes(iv)){ dotClass='third'; label=NOTES[semitone]; }
+        else { dotClass='other'; label=NOTES[semitone]; }
+      }
+
+      html += `<div class="fcell${f===0?' nut':''}">`;
+      if(dotClass) html+=`<div class="ndot ${dotClass}">${label}</div>`;
+      html += '</div>';
+    }
+    html += '</div></div></div></div>';
+  }
+
+  html += '</div></div></div>';
+  return html;
+}
+
+function buildRiff(prog, notesSemitones) {
+  const tabStr = prog.riff(notesSemitones);
+  return `<div class="riff-section">
+    <div class="riff-label">Riff skeleton — landmarks only, fill the rest</div>
+    <div class="tab-block">${tabStr}</div>
+  </div>`;
+}
+
+function buildContext(prog, noteNames, romanStr) {
+  const refs = prog.refs.map(r=>`<span class="ref-tag">${r}</span>`).join('');
+  return `<div class="context-section">
+    <div class="context-grid">
+      <div class="ctx-block">
+        <h4>Feel</h4>
+        <p>${prog.feel}</p>
+      </div>
+      <div class="ctx-block">
+        <h4>Reference bands</h4>
+        <div class="ref-tags">${refs}</div>
+        <p style="margin-top:8px"><strong>Order tip:</strong> Rearrange these landmarks in any order — same notes, completely different feel. The progression is a suggestion, not a rule.</p>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ── TOGGLE CARD ───────────────────────────────────────────────────────────
+function toggleCard(idx) {
+  openCard = openCard === idx ? null : idx;
+  buildCards();
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────
+buildKeys();
+buildCards();
+</script>
+</body>
+</html>

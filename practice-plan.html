@@ -1,0 +1,1165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Practice Plan — Deathcore / Metalcore</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0a0a0b;
+    --surface: #111113;
+    --surface2: #18181c;
+    --border: #222228;
+    --text: #e2e0da;
+    --muted: #5a5860;
+    --dim: #333238;
+    --red: #c0392b;
+    --red-dim: #3d1410;
+    --blue: #1a6fa8;
+    --blue-dim: #0d2a3d;
+    --green: #1d8a4e;
+    --green-dim: #0a2a18;
+    --amber: #b07d20;
+    --amber-dim: #2e200a;
+    --mono: 'Space Mono', monospace;
+    --sans: 'Inter', sans-serif;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  /* HEADER */
+  .header {
+    padding: 32px 24px 24px;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .header::before {
+    content: 'PRACTICE';
+    position: absolute;
+    right: -10px;
+    top: -10px;
+    font-family: var(--mono);
+    font-size: 80px;
+    font-weight: 700;
+    color: var(--border);
+    pointer-events: none;
+    line-height: 1;
+    user-select: none;
+  }
+
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  h1 {
+    font-family: var(--mono);
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.2;
+    margin-bottom: 6px;
+  }
+
+  .header-sub {
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  /* PHASE NAV */
+  .phase-nav {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .phase-btn {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 14px 8px;
+    background: transparent;
+    border: none;
+    border-right: 1px solid var(--border);
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: center;
+    line-height: 1.4;
+  }
+
+  .phase-btn:last-child { border-right: none; }
+  .phase-btn:hover { color: var(--text); background: var(--surface); }
+  .phase-btn.active { color: var(--text); background: var(--surface2); border-bottom: 2px solid var(--red); }
+
+  .phase-btn .phase-label { display: block; font-size: 9px; color: var(--muted); margin-top: 2px; }
+  .phase-btn.active .phase-label { color: var(--red); }
+
+  /* PHASE CONTENT */
+  .phase-content { display: none; }
+  .phase-content.active { display: block; }
+
+  /* WEEK HEADER */
+  .week-header {
+    padding: 20px 24px 12px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .week-title {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+
+  .week-focus {
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  /* DAY TABS */
+  .day-nav {
+    display: flex;
+    overflow-x: auto;
+    border-bottom: 1px solid var(--border);
+    scrollbar-width: none;
+  }
+
+  .day-nav::-webkit-scrollbar { display: none; }
+
+  .day-btn {
+    font-family: var(--mono);
+    font-size: 10px;
+    padding: 10px 14px;
+    background: transparent;
+    border: none;
+    border-right: 1px solid var(--border);
+    color: var(--muted);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.15s;
+    flex-shrink: 0;
+  }
+
+  .day-btn:hover { color: var(--text); }
+  .day-btn.active { color: var(--text); background: var(--surface2); }
+  .day-btn.rest { color: #2a282e; }
+  .day-btn.rest.active { color: var(--muted); }
+
+  /* SESSION BLOCKS */
+  .session { padding: 20px 24px; }
+
+  .session-block {
+    margin-bottom: 16px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+  }
+
+  .block-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .block-tag {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 3px 7px;
+    flex-shrink: 0;
+  }
+
+  .tag-technique { background: var(--blue-dim); color: #4a9fd4; }
+  .tag-riff { background: var(--red-dim); color: #e05a4a; }
+  .tag-theory { background: var(--amber-dim); color: #d4a030; }
+  .tag-drums { background: var(--green-dim); color: #40c078; }
+  .tag-song { background: #1a1030; color: #8060d0; }
+  .tag-ear { background: #101a20; color: #3090a0; }
+
+  .block-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+    flex: 1;
+  }
+
+  .block-time {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+    flex-shrink: 0;
+  }
+
+  .block-body {
+    padding: 14px 16px;
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.7;
+    display: none;
+  }
+
+  .block-body.open { display: block; }
+
+  .block-body strong { color: var(--text); font-weight: 500; }
+
+  .block-body .tab {
+    font-family: var(--mono);
+    font-size: 10px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    padding: 10px 12px;
+    margin: 10px 0;
+    overflow-x: auto;
+    white-space: pre;
+    line-height: 1.6;
+    color: #888;
+  }
+
+  .block-body ul {
+    margin: 8px 0 8px 16px;
+  }
+
+  .block-body ul li { margin-bottom: 4px; }
+
+  .chevron {
+    font-size: 10px;
+    color: var(--muted);
+    transition: transform 0.15s;
+    flex-shrink: 0;
+  }
+
+  .chevron.open { transform: rotate(180deg); }
+
+  /* REST DAY */
+  .rest-day {
+    padding: 40px 24px;
+    text-align: center;
+  }
+
+  .rest-day p {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.8;
+  }
+
+  .rest-day strong { color: var(--text); }
+
+  /* PROGRESS TRACKER */
+  .tracker {
+    margin: 0 24px 24px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+  }
+
+  .tracker-header {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .tracker-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 1px;
+    background: var(--border);
+    padding: 1px;
+  }
+
+  .tracker-cell {
+    background: var(--surface);
+    padding: 10px 4px;
+    text-align: center;
+    cursor: pointer;
+    transition: background 0.1s;
+  }
+
+  .tracker-cell .tc-label {
+    font-family: var(--mono);
+    font-size: 8px;
+    color: var(--muted);
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  .tracker-cell .tc-dot {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    margin: 0 auto;
+    transition: all 0.1s;
+  }
+
+  .tracker-cell.done .tc-dot { background: var(--red); border-color: var(--red); }
+  .tracker-cell.done .tc-label { color: var(--text); }
+
+  /* MILESTONES */
+  .milestones {
+    padding: 0 24px 32px;
+  }
+
+  .milestone-title {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+
+  .milestone {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+  }
+
+  .milestone:last-child { border-bottom: none; }
+
+  .m-check {
+    width: 18px;
+    height: 18px;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    flex-shrink: 0;
+    margin-top: 1px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    transition: all 0.1s;
+  }
+
+  .milestone.done .m-check { background: var(--red); border-color: var(--red); color: #fff; }
+  .milestone.done .m-text { color: var(--muted); text-decoration: line-through; }
+
+  .m-text {
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.4;
+  }
+
+  .m-sub {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="eyebrow">Hundo / Lideon Studios</div>
+  <h1>Guitar Practice Plan<br>Deathcore · Metalcore · 7-String</h1>
+  <p class="header-sub">Intermediate · Drop A · Ibanez RGA742EX · EZ Drummer 3</p>
+</div>
+
+<div class="phase-nav">
+  <button class="phase-btn active" onclick="setPhase(0)">
+    Phase 1
+    <span class="phase-label">Weeks 1–4<br>Foundation</span>
+  </button>
+  <button class="phase-btn" onclick="setPhase(1)">
+    Phase 2
+    <span class="phase-label">Weeks 5–8<br>Riff Building</span>
+  </button>
+  <button class="phase-btn" onclick="setPhase(2)">
+    Phase 3
+    <span class="phase-label">Weeks 9–12<br>Songwriting</span>
+  </button>
+</div>
+
+<!-- PHASE 1 -->
+<div class="phase-content active" id="phase-0">
+  <div class="week-header">
+    <div class="week-title">Phase 1 — Foundation</div>
+    <div class="week-focus">Alternate picking consistency · CAGED positions 1 & 2 · Basic drum programming · Tritone / minor scale vocabulary</div>
+  </div>
+
+  <div style="padding: 16px 24px 0;">
+    <div class="day-nav" id="days-0">
+      <button class="day-btn active" onclick="setDay(0,0)">MON</button>
+      <button class="day-btn" onclick="setDay(0,1)">TUE</button>
+      <button class="day-btn" onclick="setDay(0,2)">WED</button>
+      <button class="day-btn" onclick="setDay(0,3)">THU</button>
+      <button class="day-btn" onclick="setDay(0,4)">FRI</button>
+      <button class="day-btn rest" onclick="setDay(0,5)">SAT</button>
+      <button class="day-btn rest" onclick="setDay(0,6)">SUN</button>
+    </div>
+  </div>
+
+  <div id="phase-0-days">
+
+    <!-- MON -->
+    <div class="session day-panel-0 active">
+      <div class="session-block">
+        <div class="block-header" onclick="toggleBlock(this)">
+          <span class="block-tag tag-technique">Technique</span>
+          <span class="block-title">Alternate picking warm-up</span>
+          <span class="block-time">10 min</span>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="block-body">
+          <strong>Metronome at 80bpm, 16th notes, string 7 only.</strong> Strict alternate picking — down up down up, no cheating. Focus: every note the same volume, mute stays consistent. Bump 5bpm when it feels locked in.
+          <div class="tab">A7|--0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0--|
+     PM throughout, accent every downstroke slightly</div>
+          When comfortable, add the gap pattern: play 3, skip 1, play 3, skip 1. That's where the death metal pocket starts.
+        </div>
+      </div>
+
+      <div class="session-block">
+        <div class="block-header" onclick="toggleBlock(this)">
+          <span class="block-tag tag-theory">Theory</span>
+          <span class="block-title">CAGED Position 1 — A minor, frets 4–7</span>
+          <span class="block-time">15 min</span>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="block-body">
+          <strong>Goal: memorize where the root dots (A) live in this position.</strong> Don't try to play it fast. Just find every A note in the fret 4–7 zone and play them one by one.
+          <ul>
+            <li>String 7, fret 5 — low A root</li>
+            <li>String 5, fret 7 — mid A root</li>
+            <li>String 2, fret 5 — high A root</li>
+          </ul>
+          Then connect them with hammer-ons and pull-offs exactly like your midwest emo instincts. Same mechanic, new map.
+        </div>
+      </div>
+
+      <div class="session-block">
+        <div class="block-header" onclick="toggleBlock(this)">
+          <span class="block-tag tag-riff">Riff</span>
+          <span class="block-title">Tritone riff development</span>
+          <span class="block-time">20 min</span>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="block-body">
+          <strong>Take your current riff (open → fret 6 tritone) and extend it by one bar.</strong> The goal isn't to finish a riff — it's to ask "what comes after this?" and try 3 different answers. Keep the best one.
+          <div class="tab">What you have:
+E  |--5--1--------------------|
+A7 |--0-0-0-0-0-0-0-0-0-------|  PM
+
+Try adding after it — option A (resolve down):
+E  |--5--1----0---------------|
+A7 |--0-0-0-0---0-0-0---------|
+
+Option B (climb up to pos 2):
+G  |------------------7h9-----|
+E  |--5--1--------------------|
+A7 |--0-0-0-0-0-0-0-0---------|</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TUE -->
+    <div class="session day-panel-0" style="display:none">
+      <div class="session-block">
+        <div class="block-header" onclick="toggleBlock(this)">
+          <span class="block-tag tag-drums">EZD3</span>
+          <span class="block-title">First drum pattern — half-time feel</span>
+          <span class="block-time">20 min</span>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="block-body">
+          <strong>Open EZ Drummer 3. Find the Death & Darkness or Metal Machine expansion.</strong> Start with a half-time groove — kick on beat 1, snare on beat 3. This is the foundation under most deathcore mid-sections.
+          <ul>
+            <li>Kick: beat 1 and the "and" of beat 3</li>
+            <li>Snare: beat 3 only (half-time feel)</li>
+            <li>Hi-hat: 8th notes throughout</li>
+          </ul>
+          Play your tritone riff over it. Even rough — just hear how the chug sits under a real drum pattern. That feeling is the whole reason EZD3 exists.
+        </div>
+      </div>
+
+      <div class="session-block">
+        <div class="block-header" onclick="toggleBlock(this)">
+          <span class="block-tag tag-technique">Technique</span>
+          <span class="block-title">String skipping intro — strings 7 and 3</span>
+          <span class="block-time">15 min</span>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="block-body">
+          <strong>This is the "knuckle" move — low chug, high stab, skip the middle strings.</strong> Slow and deliberate at first. The pick has to arc over strings 4, 5, 6 cleanly.
+          <div class="tab">e  |----------------------|
+B  |----------------------|
+G  |--7-------------------|   ← stab, then back down
+D  |----------------------|
+A  |----------------------|
+E  |----------------------|
+A7 |--0-0-0-0-0-0-0-------|   PM chugs, then jump to G string</div>
+          It'll feel clunky for days. That's normal. The jump becomes muscle memory fast.
+        </div>
+      </div>
+
+      <div class="session-block">
+        <div class="block-header" onclick="toggleBlock(this)">
+          <span class="block-tag tag-ear">Ear</span>
+          <span class="block-title">Active listening — Angelmaker / Carcosa</span>
+          <span class="block-time">10 min</span>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="block-body">
+          <strong>Pick one song. Listen twice. Guitar in hand but don't play along.</strong>
+          <ul>
+            <li>First listen: just feel where the groove locks in</li>
+            <li>Second listen: count 16th notes. Where are the gaps? Where do the power chords land — on the beat or just before it?</li>
+          </ul>
+          You don't need to transcribe it. Just build the habit of hearing rhythm as a grid with stuff removed, not stuff added.
+        </div>
+      </div>
+    </div>
+
+    <!-- WED -->
+    <div class="session day-panel-0" style="display:none">
+      <div class="session-block">
+        <div class="block-header" onclick="toggleBlock(this)">
+          <span class="block-tag tag-technique">Technique</span>
+          <span class="block-title">Alternate picking — accent groupings of 3</span>
+          <span class="block-time">15 min</span>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="block-body">
+          <strong>This is the Angelmaker rolling feel.</strong> Alternate pick 16th notes but accent every 3rd note slightly. Over a 4/4 bar this creates rhythmic displacement — it stops feeling like a grid and starts lurching.
+          <div class="tab">Accent pattern over 16ths (> = accent):
+> . . > . . > . . > . . > . . >
+1 e + a 2 e + a 3 e + a 4 e + a
+
+Feel how beat 1 of the next bar is also accented — 
+the pattern is 3+3+3+3+4 which never lines up cleanly.</div>
+          Start at 70bpm. This is uncomfortable at first because it fights your natural tendency to accent beat 1. That discomfort is the point.
+        </div>
+      </div>
+
+      <div class="session-block">
+        <div class="block-header" onclick="toggleBlock(this)">
+          <span class="block-tag tag-theory">Theory</span>
+          <span class="block-title">Minor scale — connecting positions 1 and 2</span>
+          <span class="block-time">20 min</span>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="block-body">
+          <strong>The bridge between positions is the most important thing you can learn this phase.</strong> Position 1 tops out around fret 7. Position 2 starts at fret 7. That overlap is the doorway.
+          <div class="tab">The handoff — play this slowly:
+G  |--5h7-------7h9---------|   pos 1 → pos 2
+D  |------5h7---------------|
+A  |--5---------------------|   root, then climb
+
+You exit position 1 on the G string at fret 7,
+and you're already inside position 2.</div>
+          Repeat this until the shift feels like one motion, not two.
+        </div>
+      </div>
+
+      <div class="session-block">
+        <div class="block-header" onclick="toggleBlock(this)">
+          <span class="block-tag tag-riff">Riff</span>
+          <span class="block-title">Free writing — no rules, 20 minutes</span>
+          <span class="block-time">20 min</span>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="block-body">
+          <strong>No metronome. No goals. Just play.</strong> Record everything (phone on the desk is fine). The only rule: if something sounds good for even 2 seconds, loop it immediately and remember it. Your instincts are better than you think — you just have to catch them before they disappear.
+        </div>
+      </div>
+    </div>
+
+    <!-- THU -->
+    <div class="session day-panel-0" style="display:none">
+      <div class="session-block">
+        <div class="block-header" onclick="toggleBlock(this)">
+          <span class="block-tag tag-drums">EZD3</span>
+          <span class="block-title">Blast beat intro + pairing with riff</span>
+          <span class="block-time">20 min</span>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="block-body">
+          <strong>The blast beat is the other main death metal drum feel.</strong> In EZD3 search "blast" in the MIDI browser — there will be pre-built patterns. Drop one in and play your chug riff over it.
+          <ul>
+            <li>Notice how the blast beat makes even simple chugs sound more intense</li>
+            <li>Try alternating: 2 bars blast beat, 2 bars half-time. That contrast is a full song section right there.</li>
+          </ul>
+          Don't try to program blast beats from scratch yet — just learn to use the library patterns intelligently.
+        </div>
+      </div>
+
+      <div class="session-block">
+        <div class="block-header" onclick="toggleBlock(this)">
+          <span class="block-tag tag-technique">Technique</span>
+          <span class="block-title">Palm mute control — dead vs open</span>
+          <span class="block-time">15 min</span>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="block-body">
+          <strong>Death metal palm muting is almost a full mute — barely any sustain.</strong> Rock palm muting is loose. You want the pick side of your hand pressing hard right at the bridge saddles.
+          <ul>
+            <li>Play a note fully muted (should sound almost like a thud)</li>
+            <li>Play the same note fully open (full sustain)</li>
+            <li>Now control the transition between them in a single riff</li>
+          </ul>
+          The contrast between dead mute and sudden open note is one of the main textures in deathcore. Carcosa uses this constantly.
+        </div>
+      </div>
+
+      <div class="session-block">
+        <div class="block-header" onclick="toggleBlock(this)">
+          <span class="block-tag tag-riff">Riff</span>
+          <span class="block-title">Rhythm displacement exercise</span>
+          <span class="block-time">15 min</span>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="block-body">
+          <strong>Take any 4-note pattern. Play it starting on beat 1. Then start it on beat 2. Then the "and" of beat 2.</strong> Same notes — completely different feel each time. This is how you make one idea into three riffs.
+          <div class="tab">Original (starts beat 1):
+A7 |--0-0-0-6--0-0-0-6--|
+
+Displaced (starts "and" of 1):
+A7 |----0-0-0-6--0-0-0--|
+
+Displaced again (starts beat 2):
+A7 |--0---0-0-0-6--0-0--|</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FRI -->
+    <div class="session day-panel-0" style="display:none">
+      <div class="session-block">
+        <div class="block-header" onclick="toggleBlock(this)">
+          <span class="block-tag tag-song">Song</span>
+          <span class="block-title">Weekly review — what stuck?</span>
+          <span class="block-time">15 min</span>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="block-body">
+          <strong>Play back anything you recorded this week.</strong> Pick one thing that felt good — a riff fragment, a rhythm pattern, a transition — and write it down or tab it out roughly. That's your seed for next week.
+        </div>
+      </div>
+
+      <div class="session-block">
+        <div class="block-header" onclick="toggleBlock(this)">
+          <span class="block-tag tag-riff">Riff</span>
+          <span class="block-title">Full riff attempt — 8 bars</span>
+          <span class="block-time">30 min</span>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="block-body">
+          <strong>Combine everything from this week into one 8-bar riff.</strong> Doesn't have to be good. The goal is: it starts, it does something, it ends. Structure over quality right now.
+          <ul>
+            <li>Bars 1–4: your chug riff with tritone stabs</li>
+            <li>Bars 5–6: something from position 1 on higher strings</li>
+            <li>Bars 7–8: return to the chug, but with the syncopated landing</li>
+          </ul>
+          Record it over an EZD3 half-time pattern. Listen back. You made a thing.
+        </div>
+      </div>
+    </div>
+
+    <!-- SAT -->
+    <div class="session day-panel-0" style="display:none">
+      <div class="rest-day">
+        <p><strong>Rest day.</strong><br><br>
+        Let your hands recover. Tendons need time.<br>
+        If you absolutely need to touch the guitar —<br>
+        noodle without a pick, no pressure, no goals.<br><br>
+        <strong>Active rest:</strong> listen to your reference bands.<br>
+        Count rhythms. Notice song structures.<br>
+        Verse, breakdown, chorus, breakdown, outro.<br>
+        That's your template.</p>
+      </div>
+    </div>
+
+    <!-- SUN -->
+    <div class="session day-panel-0" style="display:none">
+      <div class="rest-day">
+        <p><strong>Rest day.</strong><br><br>
+        Seriously. Rest.<br><br>
+        Or: spend 20 minutes in EZD3 only.<br>
+        No guitar. Just build a 2-part drum arrangement —<br>
+        blast section into half-time — and get comfortable<br>
+        thinking about drums as a compositional layer,<br>
+        not just a backing track.</p>
+      </div>
+    </div>
+
+  </div><!-- end phase-0-days -->
+</div>
+
+<!-- PHASE 2 -->
+<div class="phase-content" id="phase-1">
+  <div class="week-header">
+    <div class="week-title">Phase 2 — Riff Building</div>
+    <div class="week-focus">CAGED positions 3 & 4 · Chromatic runs · Song sections (verse/breakdown) · EZD3 arrangement · Pinch harmonics</div>
+  </div>
+
+  <div style="padding: 16px 24px 0;">
+    <div class="day-nav">
+      <button class="day-btn active" onclick="setDay(1,0,this)">MON</button>
+      <button class="day-btn" onclick="setDay(1,1,this)">TUE</button>
+      <button class="day-btn" onclick="setDay(1,2,this)">WED</button>
+      <button class="day-btn" onclick="setDay(1,3,this)">THU</button>
+      <button class="day-btn" onclick="setDay(1,4,this)">FRI</button>
+      <button class="day-btn rest" onclick="setDay(1,5,this)">SAT</button>
+      <button class="day-btn rest" onclick="setDay(1,6,this)">SUN</button>
+    </div>
+  </div>
+
+  <div id="phase-1-days">
+    <div class="session day-panel-1 active">
+      <div class="session-block">
+        <div class="block-header" onclick="toggleBlock(this)">
+          <span class="block-tag tag-theory">Theory</span>
+          <span class="block-title">CAGED Position 3 — frets 9–12</span>
+          <span class="block-time">20 min</span>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="block-body">
+          <strong>You're moving up the neck now.</strong> Position 3 sits at the C-shape anchor around frets 9–12. This is lead territory — bends and vibrato feel better up here, and pinch harmonics scream.
+          <ul>
+            <li>Find your A root notes: string 3 fret 9, string 6 fret 12</li>
+            <li>Run the minor scale up from fret 9 on string 4</li>
+            <li>Connect to Position 2 by sliding from fret 9 down to fret 7 on string 4</li>
+          </ul>
+        </div>
+      </div>
+      <div class="session-block">
+        <div class="block-header" onclick="toggleBlock(this)">
+          <span class="block-tag tag-riff">Riff</span>
+          <span class="block-title">Write a breakdown section</span>
+          <span class="block-time">25 min</span>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="block-body">
+          <strong>A breakdown is just a riff that slows down and hits harder.</strong> Take your Phase 1 chug riff, cut the tempo by 30%, and add more space between hits. In EZD3, pair it with a half-time snare on beat 3 only. That's a breakdown.
+          <div class="tab">Breakdown feel (slower, more space):
+A7 |--0----0----0-6--0----0-6----|
+     PM  PM  PM       PM    
+     ^more gap between each hit</div>
+        </div>
+      </div>
+      <div class="session-block">
+        <div class="block-header" onclick="toggleBlock(this)">
+          <span class="block-tag tag-technique">Technique</span>
+          <span class="block-title">Chromatic passing tones</span>
+          <span class="block-time">15 min</span>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="block-body">
+          <strong>Chromatic notes are notes outside the scale used as brief connectors.</strong> They make riffs feel more chaotic and evil — essential for the tech-death flavor in Angelmaker.
+          <div class="tab">Minor scale with chromatic passing tones:
+A  |--5--6--7--8--7--6--5--|
+      ^   ^these are chromatic (not in A minor)
+      root        they create tension before resolving</div>
+          The rule: land on a scale note, leave on a chromatic, land back on a scale note. The chromatic is just a connector — it doesn't stay.
+        </div>
+      </div>
+    </div>
+
+    <div class="session day-panel-1" style="display:none">
+      <div class="session-block">
+        <div class="block-header" onclick="toggleBlock(this)">
+          <span class="block-tag tag-drums">EZD3</span>
+          <span class="block-title">Drum arrangement — verse into breakdown</span>
+          <span class="block-time">25 min</span>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="block-body">
+          <strong>Build a 16-bar drum arrangement in EZD3.</strong>
+          <ul>
+            <li>Bars 1–8: blast beat or driving 16th kick pattern (verse energy)</li>
+            <li>Bar 8: fill — EZD3 has great pre-built fills, just drag one in</li>
+            <li>Bars 9–16: half-time breakdown feel</li>
+          </ul>
+          This is a real song section. Now write guitar over it.
+        </div>
+      </div>
+      <div class="session-block">
+        <div class="block-header" onclick="toggleBlock(this)">
+          <span class="block-tag tag-technique">Technique</span>
+          <span class="block-title">Pinch harmonics — intro</span>
+          <span class="block-time">15 min</span>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="block-body">
+          <strong>Pinch harmonics are the "squeal" in deathcore.</strong> You catch the string with your thumb just after the pick strikes. The higher the gain on your GE1000, the easier they are to get.
+          <ul>
+            <li>Hold pick with very little exposed — almost no pick tip showing</li>
+            <li>Strike the string and let your thumb graze it immediately after</li>
+            <li>Try at the 4th fret on string 2 first — that position tends to squeal easiest</li>
+          </ul>
+          It takes days to get consistently. Don't stress it — just get one reliable squeal per session.
+        </div>
+      </div>
+    </div>
+
+    <div class="session day-panel-1" style="display:none">
+      <div class="session-block">
+        <div class="block-header" onclick="toggleBlock(this)">
+          <span class="block-tag tag-riff">Riff</span>
+          <span class="block-title">Two-riff contrast exercise</span>
+          <span class="block-time">30 min</span>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="block-body">
+          <strong>Write two riffs that are opposites of each other, then play them back to back.</strong>
+          <ul>
+            <li>Riff A: fast, dense, low on the neck (string 7 focused)</li>
+            <li>Riff B: slower, more space, higher on the neck (position 2 or 3)</li>
+          </ul>
+          The contrast is the song. Deathcore is almost entirely built on this tension — dense verse, open bridge, dense again. You just wrote a structure.
+        </div>
+      </div>
+      <div class="session-block">
+        <div class="block-header" onclick="toggleBlock(this)">
+          <span class="block-tag tag-theory">Theory</span>
+          <span class="block-title">Phrygian dominant flavor</span>
+          <span class="block-time">15 min</span>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="block-body">
+          <strong>Phrygian dominant is the "Spanish / sinister" scale — it's all over deathcore.</strong> In A it's: A Bb C# D E F G. The key note is the b2 (Bb, one fret above the root). That's the note that makes it sound ancient and evil.
+          <div class="tab">A Phrygian Dominant starting on string 7:
+A7 |--5--6--(8)--|   ← fret 6 is the Bb (b2) — that's the evil note
+E  |--7--8-------|
+A  |--7--8-------|</div>
+          Just play around fret 6 on string 7 alongside your open A chugs. You already know this sound — it's what your tritone riff was brushing against.
+        </div>
+      </div>
+    </div>
+
+    <div class="session day-panel-1" style="display:none">
+      <div class="session-block">
+        <div class="block-header" onclick="toggleBlock(this)">
+          <span class="block-tag tag-song">Song</span>
+          <span class="block-title">Song map — sketch a full structure</span>
+          <span class="block-time">30 min</span>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="block-body">
+          <strong>On paper or notes app, sketch a full song structure using what you have.</strong>
+          <div class="tab">Example structure (instrumental):
+Intro         — 8 bars, riff A (dense chug)
+Verse         — 16 bars, riff A + variation
+Pre-breakdown — 4 bars, riff B (open, higher)
+Breakdown     — 8 bars, slow, heavy
+Re-intro      — 8 bars, riff A returns (hits harder now)
+Outro         — 8 bars, riff B dissolves</div>
+          You don't have to fill in all the riffs. Just name the sections and what energy they should have. This is how you write a song — map first, fill second.
+        </div>
+      </div>
+      <div class="session-block">
+        <div class="block-header" onclick="toggleBlock(this)">
+          <span class="block-tag tag-drums">EZD3</span>
+          <span class="block-title">Matching drum energy to song sections</span>
+          <span class="block-time">20 min</span>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="block-body">
+          <strong>For each section in your song map, pick a drum feel:</strong>
+          <ul>
+            <li>Intro / verse: driving, blast or 16th kick pattern</li>
+            <li>Pre-breakdown: fill, maybe just kick and snare stripped back</li>
+            <li>Breakdown: half-time, snare on 3 only, lots of space</li>
+            <li>Re-intro: immediately back to full intensity</li>
+          </ul>
+          The drum arrangement IS the song structure. Guitar follows it, not the other way around.
+        </div>
+      </div>
+    </div>
+
+    <div class="session day-panel-1" style="display:none">
+      <div class="session-block">
+        <div class="block-header" onclick="toggleBlock(this)">
+          <span class="block-tag tag-song">Song</span>
+          <span class="block-title">Record a rough demo — no judgment</span>
+          <span class="block-time">45 min</span>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="block-body">
+          <strong>Record whatever you have into FL Studio over your EZD3 arrangement.</strong> It doesn't have to be tight. It doesn't have to sound good. The only goal is: something plays start to finish and you can listen back to the whole thing.
+          <ul>
+            <li>Export it as an MP3</li>
+            <li>Listen on your phone, away from the desk</li>
+            <li>Note 3 things: what's working, what feels wrong, what's missing</li>
+          </ul>
+          That listen-back IS the lesson. Most of what you need to work on next will be obvious the second you hear it in a different context.
+        </div>
+      </div>
+    </div>
+
+    <div class="session day-panel-1" style="display:none">
+      <div class="rest-day">
+        <p><strong>Rest day.</strong><br><br>Listen to your demo from Friday.<br>Let it sit. Don't fix anything yet.</p>
+      </div>
+    </div>
+
+    <div class="session day-panel-1" style="display:none">
+      <div class="rest-day">
+        <p><strong>Rest day.</strong><br><br>
+        Optional: 20 min of EZD3 only.<br>
+        Explore the MIDI library. Drag patterns around.<br>
+        Get fluent in the tool without any guitar pressure.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PHASE 3 -->
+<div class="phase-content" id="phase-2">
+  <div class="week-header">
+    <div class="week-title">Phase 3 — Songwriting</div>
+    <div class="week-focus">Full song completion · All 5 CAGED positions · Lead melodic lines · Mix fundamentals in FL Studio · Optional fry vocal scratch tracks</div>
+  </div>
+
+  <div style="padding: 16px 24px 0;">
+    <div class="day-nav">
+      <button class="day-btn active" onclick="setDay(2,0,this)">MON</button>
+      <button class="day-btn" onclick="setDay(2,1,this)">TUE</button>
+      <button class="day-btn" onclick="setDay(2,2,this)">WED</button>
+      <button class="day-btn" onclick="setDay(2,3,this)">THU</button>
+      <button class="day-btn" onclick="setDay(2,4,this)">FRI</button>
+      <button class="day-btn rest" onclick="setDay(2,5,this)">SAT</button>
+      <button class="day-btn rest" onclick="setDay(2,6,this)">SUN</button>
+    </div>
+  </div>
+
+  <div id="phase-2-days">
+    <div class="session day-panel-2 active">
+      <div class="session-block">
+        <div class="block-header" onclick="toggleBlock(this)">
+          <span class="block-tag tag-song">Song</span>
+          <span class="block-title">Complete song revision from Phase 2 demo</span>
+          <span class="block-time">30 min</span>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="block-body">
+          <strong>Take the 3 notes from your Phase 2 listen-back and fix one of them.</strong> Just one. The instinct to fix everything at once kills songs. Pick the most wrong thing and address it this session only.
+        </div>
+      </div>
+      <div class="session-block">
+        <div class="block-header" onclick="toggleBlock(this)">
+          <span class="block-tag tag-theory">Theory</span>
+          <span class="block-title">CAGED positions 4 & 5 — upper neck</span>
+          <span class="block-time">20 min</span>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="block-body">
+          <strong>Position 4 (frets 11–14) is where leads sound desperate and high-tension.</strong> Force yourself to start a riff here and resolve downward. The movement from high to low creates natural release.
+          <br><br>
+          <strong>Position 5 (frets 2–5)</strong> wraps around below position 1, connecting open string feel to the main box. Great for riffs that use open string pull-offs.
+        </div>
+      </div>
+      <div class="session-block">
+        <div class="block-header" onclick="toggleBlock(this)">
+          <span class="block-tag tag-ear">Optional</span>
+          <span class="block-title">Fry vocal scratch track</span>
+          <span class="block-time">15 min</span>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="block-body">
+          <strong>If you've been practicing fry technique (FreddyEG on YouTube), try recording a scratch vocal over your breakdown section.</strong> It doesn't have to be good. You're just hearing where vocals could sit and what rhythms feel natural to scream over.
+          <ul>
+            <li>Mic or phone in front of you</li>
+            <li>Play the breakdown on loop</li>
+            <li>Make noise. Any noise. Find the rhythm first, tone comes later.</li>
+          </ul>
+          Scratch vocals often reveal problems in the riff timing that you can't hear instrumentally.
+        </div>
+      </div>
+    </div>
+
+    <div class="session day-panel-2" style="display:none">
+      <div class="session-block">
+        <div class="block-header" onclick="toggleBlock(this)">
+          <span class="block-tag tag-riff">Riff</span>
+          <span class="block-title">Melodic lead line over chord progression</span>
+          <span class="block-time">30 min</span>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="block-body">
+          <strong>Write a 4-bar melodic line that sits in position 3 or 4.</strong> This is the "breathing" moment in your song — not a chug, just a melody. Bands like Carcosa and Netherwalker use these to give the listener's ear a rest before the next heavy section.
+          <ul>
+            <li>Stay in A minor — just use the dots from position 3</li>
+            <li>Slow, deliberate notes with space between them</li>
+            <li>Vibrato on held notes if you can (wrist vibrato, not finger)</li>
+          </ul>
+        </div>
+      </div>
+      <div class="session-block">
+        <div class="block-header" onclick="toggleBlock(this)">
+          <span class="block-tag tag-drums">EZD3</span>
+          <span class="block-title">Full song drum arrangement</span>
+          <span class="block-time">30 min</span>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="block-body">
+          <strong>Build the complete drum arrangement for your song in EZD3.</strong> Every section, start to finish, with transitions and fills. Export it as a stem (WAV) so you can record guitar over a locked-in drum track.
+        </div>
+      </div>
+    </div>
+
+    <div class="session day-panel-2" style="display:none">
+      <div class="session-block">
+        <div class="block-header" onclick="toggleBlock(this)">
+          <span class="block-tag tag-song">Song</span>
+          <span class="block-title">Full guitar tracking session</span>
+          <span class="block-time">60 min</span>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="block-body">
+          <strong>Record the whole song, section by section, over your drum stem.</strong>
+          <ul>
+            <li>Don't do full takes — punch in section by section</li>
+            <li>Get a good take of each section before moving on</li>
+            <li>Double track if you can — record the same part twice and pan L/R. Instant width.</li>
+          </ul>
+          This session is about committing. Stop tweaking riffs and track what you have.
+        </div>
+      </div>
+    </div>
+
+    <div class="session day-panel-2" style="display:none">
+      <div class="session-block">
+        <div class="block-header" onclick="toggleBlock(this)">
+          <span class="block-tag tag-song">Song</span>
+          <span class="block-title">Basic mix — guitars, drums, space</span>
+          <span class="block-time">45 min</span>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="block-body">
+          <strong>You don't need to master mixing. You need three moves:</strong>
+          <ul>
+            <li><strong>EQ:</strong> cut everything below 80Hz on guitars (bass lives there, not guitar). Cut a little around 400Hz if it sounds muddy.</li>
+            <li><strong>Compression:</strong> light compression on guitars to even out pick attack. EZD3 drums usually come pre-mixed decently.</li>
+            <li><strong>Panning:</strong> double-tracked guitars hard L/R. Drums centered. Any lead or melodic line slightly off-center.</li>
+          </ul>
+          That's enough for a bedroom demo to sound intentional.
+        </div>
+      </div>
+    </div>
+
+    <div class="session day-panel-2" style="display:none">
+      <div class="session-block">
+        <div class="block-header" onclick="toggleBlock(this)">
+          <span class="block-tag tag-song">Song</span>
+          <span class="block-title">Final export — you made a song</span>
+          <span class="block-time">30 min</span>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="block-body">
+          <strong>Export a final mix. Name it. Save it somewhere real.</strong>
+          <br><br>
+          Listen to it on your phone, in headphones, in your car if you have one. Let other ears hear it if you're comfortable. You shipped something. That matters more than whether it's perfect.
+          <br><br>
+          Then: what did you learn? What would you do differently? That's your Phase 4.
+        </div>
+      </div>
+    </div>
+
+    <div class="session day-panel-2" style="display:none">
+      <div class="rest-day"><p><strong>Rest.</strong><br><br>You earned it.</p></div>
+    </div>
+    <div class="session day-panel-2" style="display:none">
+      <div class="rest-day"><p><strong>Rest.</strong><br><br>Or start thinking about the next song.<br>The loop begins again.</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- MILESTONES -->
+<div style="padding: 24px 24px 8px;">
+  <div class="milestone-title">Milestones — check off as you hit them</div>
+</div>
+<div class="milestones">
+  <div class="milestone" onclick="this.classList.toggle('done'); this.querySelector('.m-check').textContent = this.classList.contains('done') ? '✓' : ''">
+    <div class="m-check"></div>
+    <div><div class="m-text">Alternate picking clean at 100bpm, 16th notes</div><div class="m-sub">Phase 1 · Week 2</div></div>
+  </div>
+  <div class="milestone" onclick="this.classList.toggle('done'); this.querySelector('.m-check').textContent = this.classList.contains('done') ? '✓' : ''">
+    <div class="m-check"></div>
+    <div><div class="m-text">CAGED positions 1 and 2 memorized — can find root notes in both</div><div class="m-sub">Phase 1 · Week 3</div></div>
+  </div>
+  <div class="milestone" onclick="this.classList.toggle('done'); this.querySelector('.m-check').textContent = this.classList.contains('done') ? '✓' : ''">
+    <div class="m-check"></div>
+    <div><div class="m-text">First 8-bar riff recorded over EZD3 drum pattern</div><div class="m-sub">Phase 1 · Week 4</div></div>
+  </div>
+  <div class="milestone" onclick="this.classList.toggle('done'); this.querySelector('.m-check').textContent = this.classList.contains('done') ? '✓' : ''">
+    <div class="m-check"></div>
+    <div><div class="m-text">Can shift between positions 1 and 2 mid-riff without stopping</div><div class="m-sub">Phase 2 · Week 5</div></div>
+  </div>
+  <div class="milestone" onclick="this.classList.toggle('done'); this.querySelector('.m-check').textContent = this.classList.contains('done') ? '✓' : ''">
+    <div class="m-check"></div>
+    <div><div class="m-text">Pinch harmonic — at least one reliable squeal per session</div><div class="m-sub">Phase 2 · Week 6</div></div>
+  </div>
+  <div class="milestone" onclick="this.classList.toggle('done'); this.querySelector('.m-check').textContent = this.classList.contains('done') ? '✓' : ''">
+    <div class="m-check"></div>
+    <div><div class="m-text">Full song structure mapped and partially recorded</div><div class="m-sub">Phase 2 · Week 8</div></div>
+  </div>
+  <div class="milestone" onclick="this.classList.toggle('done'); this.querySelector('.m-check').textContent = this.classList.contains('done') ? '✓' : ''">
+    <div class="m-check"></div>
+    <div><div class="m-text">All 5 CAGED positions — can find root notes in each zone</div><div class="m-sub">Phase 3 · Week 10</div></div>
+  </div>
+  <div class="milestone" onclick="this.classList.toggle('done'); this.querySelector('.m-check').textContent = this.classList.contains('done') ? '✓' : ''">
+    <div class="m-check"></div>
+    <div><div class="m-text">One complete song — tracked, mixed, exported</div><div class="m-sub">Phase 3 · Week 12</div></div>
+  </div>
+</div>
+
+<script>
+  function setPhase(idx) {
+    document.querySelectorAll('.phase-btn').forEach((b,i) => b.classList.toggle('active', i===idx));
+    document.querySelectorAll('.phase-content').forEach((c,i) => c.classList.toggle('active', i===idx));
+  }
+
+  function setDay(phase, day, btn) {
+    // find all day panels for this phase
+    const panels = document.querySelectorAll(`.day-panel-${phase}`);
+    panels.forEach((p, i) => {
+      p.style.display = i === day ? 'block' : 'none';
+    });
+    // update buttons in this phase's day-nav
+    const phaseEl = document.getElementById(`phase-${phase}`);
+    if (phaseEl) {
+      phaseEl.querySelectorAll('.day-btn').forEach((b, i) => b.classList.toggle('active', i === day));
+    }
+    // fallback for phase 0 which uses id-based nav
+    if (phase === 0) {
+      document.querySelectorAll('#days-0 .day-btn').forEach((b,i) => b.classList.toggle('active', i===day));
+    }
+  }
+
+  function toggleBlock(header) {
+    const body = header.nextElementSibling;
+    const chevron = header.querySelector('.chevron');
+    body.classList.toggle('open');
+    chevron.classList.toggle('open');
+  }
+</script>
+</body>
+</html>

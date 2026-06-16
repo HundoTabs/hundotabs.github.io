@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sweeps & Cascades — Drop A 7-String</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Inter:wght@300;400;500;600&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root {
+  --bg:#09090b;
+  --surface:#111115;
+  --surface2:#17171c;
+  --border:#21212a;
+  --border2:#2e2e3a;
+  --text:#e0deda;
+  --muted:#58566a;
+  --red:#b83228;
+  --red-dim:rgba(184,50,40,0.12);
+  --blue:#1a6fa8;
+  --green:#1a7a48;
+  --amber:#9a6c18;
+  --purple:#6040b0;
+  --open-color:#d4a030;
+  --mono:'Space Mono',monospace;
+  --sans:'Inter',sans-serif;
+}
+
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh}
+
+.header{
+  padding:28px 20px 20px;
+  border-bottom:1px solid var(--border);
+  position:relative;overflow:hidden;
+}
+.header::after{
+  content:'SWEEP';
+  position:absolute;right:-8px;top:-8px;
+  font-family:var(--mono);font-size:64px;font-weight:700;
+  color:var(--border);pointer-events:none;user-select:none;line-height:1;
+}
+.eyebrow{font-family:var(--mono);font-size:9px;letter-spacing:0.25em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+h1{font-family:var(--mono);font-size:18px;font-weight:700;line-height:1.2;margin-bottom:4px}
+.header-sub{font-size:12px;color:var(--muted)}
+
+/* SECTION TABS */
+.sec-tabs{display:flex;border-bottom:1px solid var(--border)}
+.sec-tab{
+  flex:1;font-family:var(--mono);font-size:10px;
+  letter-spacing:0.08em;text-transform:uppercase;
+  padding:12px 8px;background:transparent;
+  border:none;border-right:1px solid var(--border);
+  color:var(--muted);cursor:pointer;transition:all 0.12s;text-align:center;
+}
+.sec-tab:last-child{border-right:none}
+.sec-tab:hover{color:var(--text);background:var(--surface)}
+.sec-tab.active{color:var(--text);background:var(--surface2);border-bottom:2px solid var(--red)}
+
+.sec-content{display:none}
+.sec-content.active{display:block}
+
+/* CARDS */
+.cards{padding:16px 20px 0}
+.card-label{font-family:var(--mono);font-size:9px;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+
+.card{
+  background:var(--surface);border:1px solid var(--border);
+  margin-bottom:10px;cursor:pointer;transition:border-color 0.12s;
+}
+.card:hover{border-color:var(--border2)}
+.card.open{border-color:var(--red)}
+
+.card-header{display:flex;align-items:center;gap:10px;padding:12px 14px}
+.ctag{
+  font-family:var(--mono);font-size:8px;letter-spacing:0.08em;
+  text-transform:uppercase;padding:3px 7px;flex-shrink:0;
+}
+.tag-minor{background:rgba(184,50,40,0.2);color:#e06050}
+.tag-dim{background:rgba(96,40,176,0.2);color:#a070e0}
+.tag-maj{background:rgba(26,111,168,0.2);color:#50a0d8}
+.tag-aug{background:rgba(26,122,72,0.2);color:#40c080}
+.tag-cascade{background:rgba(160,112,32,0.2);color:#d09040}
+.tag-hybrid{background:rgba(140,40,140,0.2);color:#d060d0}
+
+.card-title{font-size:13px;font-weight:500;color:var(--text);flex:1}
+.card-diff{font-family:var(--mono);font-size:9px;color:var(--muted);flex-shrink:0}
+.chevron{font-size:9px;color:var(--muted);transition:transform 0.15s;flex-shrink:0}
+.card.open .chevron{transform:rotate(180deg)}
+
+.card-body{display:none;border-top:1px solid var(--border)}
+.card.open .card-body{display:block}
+
+/* TAB DISPLAY */
+.tab-section{padding:14px 16px;border-bottom:1px solid var(--border)}
+.tab-label{font-family:var(--mono);font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.tab-block{
+  font-family:var(--mono);font-size:10px;
+  background:var(--bg);border:1px solid var(--border);
+  padding:12px 14px;overflow-x:auto;white-space:pre;
+  line-height:2;color:#666;
+  scrollbar-width:thin;scrollbar-color:var(--border) transparent;
+}
+.tab-block::-webkit-scrollbar{height:3px}
+.tab-block::-webkit-scrollbar-thumb{background:var(--border)}
+.r{color:#c0392b}   /* root */
+.t{color:#1a6fa8}   /* third */
+.f{color:#1a7a48}   /* fifth */
+.o{color:#d4a030}   /* open string */
+.c{color:#333345}   /* comment */
+.p{color:#8060c0}   /* passing/chromatic */
+.dir{color:#555568} /* direction marker */
+
+/* MOTION DIAGRAM */
+.motion{padding:14px 16px;border-bottom:1px solid var(--border)}
+.motion-label{font-family:var(--mono);font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.motion-grid{display:flex;gap:8px;flex-wrap:wrap}
+.motion-step{
+  display:flex;flex-direction:column;align-items:center;
+  gap:4px;min-width:48px;
+}
+.ms-action{
+  font-family:var(--mono);font-size:8px;
+  padding:4px 6px;text-align:center;
+  border:1px solid var(--border);
+  color:var(--muted);background:var(--surface2);
+  line-height:1.3;
+}
+.ms-action.down{border-color:#b83228;color:#e06050}
+.ms-action.up{border-color:#1a6fa8;color:#50a0d8}
+.ms-action.hammer{border-color:#1a7a48;color:#40c080}
+.ms-action.pull{border-color:#d4a030;color:#d09040}
+.ms-action.open-s{border-color:#6040b0;color:#a070e0}
+.ms-arrow{font-size:10px;color:var(--muted)}
+
+/* EXPLAIN */
+.explain{padding:14px 16px}
+.explain p{font-size:12px;color:var(--muted);line-height:1.7;margin-bottom:8px}
+.explain p:last-child{margin-bottom:0}
+.explain strong{color:var(--text);font-weight:500}
+.explain .tip{
+  border-left:2px solid var(--border);
+  padding:8px 12px;margin-top:10px;
+  font-size:11px;color:var(--muted);line-height:1.7;
+}
+.explain .tip strong{color:var(--text)}
+
+/* INTEGRATION BOX */
+.integration{
+  margin:16px 20px 0;padding:14px 16px;
+  background:var(--surface);border:1px solid var(--border);
+  border-left:2px solid var(--red);
+}
+.int-label{font-family:var(--mono);font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.int-body{font-size:12px;color:var(--muted);line-height:1.7}
+.int-body strong{color:var(--text);font-weight:500}
+
+.bottom-pad{height:40px}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="eyebrow">Drop A · 7-String · Technique Reference</div>
+  <h1>Sweeps & Open String<br>Cascades</h1>
+  <p class="header-sub">Physical technique + musical context · Root / 5th / 3rd building blocks</p>
+</div>
+
+<div class="sec-tabs">
+  <button class="sec-tab active" onclick="setSection(0)">Sweep Shapes</button>
+  <button class="sec-tab" onclick="setSection(1)">Open Cascades</button>
+  <button class="sec-tab" onclick="setSection(2)">Integration</button>
+</div>
+
+<!-- ══ SWEEPS ══ -->
+<div class="sec-content active" id="sec-0">
+  <div class="integration">
+    <div class="int-label">Before you start</div>
+    <div class="int-body">
+      A sweep is <strong>one slow, controlled strum</strong> where each note pops individually and immediately mutes — strings don't ring together. Your pick travels in one direction. The left hand does the muting by releasing pressure after each note. Start <strong>extremely slow</strong> — 40bpm slow. Speed is a byproduct of clean mechanics, not the goal.
+    </div>
+  </div>
+
+  <div class="cards" style="margin-top:16px">
+    <div class="card-label">Sweep shapes — tap to expand</div>
+
+    <!-- MINOR TRIAD 3-STRING -->
+    <div class="card" onclick="toggleCard(this)">
+      <div class="card-header">
+        <span class="ctag tag-minor">Minor</span>
+        <span class="card-title">Minor Triad — 3 String (Starter)</span>
+        <span class="card-diff">Beginner</span>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="card-body">
+        <div class="tab-section">
+          <div class="tab-label">Tab — A minor, position 1</div>
+          <div class="tab-block"><span class="c">e  |---------</span><span class="r">5</span><span class="c">----|  ← root (A), top of sweep</span>
+<span class="c">B  |-------</span><span class="t">5</span><span class="c">-----|  ← minor 3rd (C)</span>
+<span class="c">G  |-----</span><span class="f">5</span><span class="c">-------|  ← 5th (E)</span>
+<span class="c">D  |--------------|</span>
+<span class="c">A  |--------------|</span>
+<span class="c">E  |--------------|</span>
+<span class="c">A₇ |--------------|</span>
+
+<span class="c">; Sweep DOWN (toward floor): G→B→e, one stroke</span>
+<span class="c">; Sweep UP (toward ceiling): e→B→G, one stroke</span>
+<span class="dir">↓ down  ↑ up</span>
+<span class="c">G  |-</span><span class="f">5</span><span class="c">------------|</span>
+<span class="c">B  |--</span><span class="t">5</span><span class="c">-----------|</span>
+<span class="c">e  |---</span><span class="r">5</span><span class="c">h</span><span class="r">8</span><span class="c">p</span><span class="r">5</span><span class="c">------|  ← hammer up to octave, pull back, sweep returns</span>
+<span class="c">B  |------</span><span class="t">5</span><span class="c">--------|</span>
+<span class="c">G  |-------</span><span class="f">5</span><span class="c">-------|</span></div>
+        </div>
+        <div class="motion">
+          <div class="motion-label">Pick motion</div>
+          <div class="motion-grid">
+            <div class="motion-step"><div class="ms-action down">↓ pick<br>G str</div></div>
+            <div class="motion-step"><div class="ms-arrow">→</div></div>
+            <div class="motion-step"><div class="ms-action down">↓ pick<br>B str</div></div>
+            <div class="motion-step"><div class="ms-arrow">→</div></div>
+            <div class="motion-step"><div class="ms-action down">↓ pick<br>e str</div></div>
+            <div class="motion-step"><div class="ms-arrow">→</div></div>
+            <div class="motion-step"><div class="ms-action hammer">H/P<br>top</div></div>
+            <div class="motion-step"><div class="ms-arrow">→</div></div>
+            <div class="motion-step"><div class="ms-action up">↑ pick<br>e str</div></div>
+            <div class="motion-step"><div class="ms-arrow">→</div></div>
+            <div class="motion-step"><div class="ms-action up">↑ pick<br>B str</div></div>
+            <div class="motion-step"><div class="ms-arrow">→</div></div>
+            <div class="motion-step"><div class="ms-action up">↑ pick<br>G str</div></div>
+          </div>
+        </div>
+        <div class="explain">
+          <p><strong>This is the foundation of every sweep.</strong> Three strings, same fret, one motion each way. The hammer-on at the top (fret 5 to 8) and pull-off back down is what turns it from a strum into a sweep — without it you'd just be barring.</p>
+          <p>The muting is the hard part. Each finger releases pressure immediately after the pick passes — almost like a rolling barre where each finger lifts as the next engages.</p>
+          <div class="tip"><strong>Death metal use:</strong> Play your chug riff, then sweep this shape as a punctuation before returning to the chug. One sweep in = texture. Sweeping constantly = loses impact.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MINOR TRIAD 5-STRING -->
+    <div class="card" onclick="toggleCard(this)">
+      <div class="card-header">
+        <span class="ctag tag-minor">Minor</span>
+        <span class="card-title">Minor Triad — 5 String (Core Shape)</span>
+        <span class="card-diff">Intermediate</span>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="card-body">
+        <div class="tab-section">
+          <div class="tab-label">Tab — A minor, position 1 (fret 5 root on A string)</div>
+          <div class="tab-block"><span class="c">e  |--------</span><span class="r">5</span><span class="c">--------|  ← root A (octave)</span>
+<span class="c">B  |------</span><span class="t">5</span><span class="c">---------|  ← C (minor 3rd)</span>
+<span class="c">G  |----</span><span class="f">5</span><span class="c">-----------|  ← E (5th)</span>
+<span class="c">D  |--</span><span class="t">7</span><span class="c">------------|  ← C (minor 3rd)</span>
+<span class="c">A  |-</span><span class="r">7</span><span class="c">-------------|  ← A (root)</span>
+<span class="c">E  |--------------|</span>
+<span class="c">A₇ |--------------|</span>
+
+<span class="c">; Full shape down then up:</span>
+<span class="c">A  |-</span><span class="r">7</span><span class="c">-</span><span class="dir">↓</span><span class="c">------------|</span>
+<span class="c">D  |--</span><span class="t">7</span><span class="c">-</span><span class="dir">↓</span><span class="c">-----------|</span>
+<span class="c">G  |---</span><span class="f">5</span><span class="c">-</span><span class="dir">↓</span><span class="c">----------|</span>
+<span class="c">B  |----</span><span class="t">5</span><span class="c">-</span><span class="dir">↓</span><span class="c">---------|</span>
+<span class="c">e  |-----</span><span class="r">5</span><span class="c">h</span><span class="r">8</span><span class="c">p</span><span class="r">5</span><span class="c">-</span><span class="dir">↑</span><span class="c">----|  ← hammer/pull at top, reverse</span>
+<span class="c">B  |--------</span><span class="t">5</span><span class="c">-</span><span class="dir">↑</span><span class="c">------|</span>
+<span class="c">G  |---------</span><span class="f">5</span><span class="c">-</span><span class="dir">↑</span><span class="c">-----|</span>
+<span class="c">D  |----------</span><span class="t">7</span><span class="c">-</span><span class="dir">↑</span><span class="c">----|</span>
+<span class="c">A  |-----------</span><span class="r">7</span><span class="c">-</span><span class="dir">↑</span><span class="c">---|</span></div>
+        </div>
+        <div class="explain">
+          <p><strong>This is the bread and butter shape.</strong> Root on the A string (fret 7 for A minor), sweep down through D G B e, hammer at the top, sweep back up. The shape is almost the same fret on every string — that's what makes it physically learnable.</p>
+          <p>To move this to any other key: find the root on the A string and rebuild from there. The <strong>relative fret distances stay identical</strong>. Same shape, different starting position.</p>
+          <div class="tip"><strong>Born of Osiris move:</strong> Play this shape, then slide the entire shape up 3 frets and repeat. Same fingering, instant key climb. That cascading ascent sound is literally just this shape moved up the neck repeatedly.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DIMINISHED -->
+    <div class="card" onclick="toggleCard(this)">
+      <div class="card-header">
+        <span class="ctag tag-dim">Diminished</span>
+        <span class="card-title">Diminished Arpeggio — The Evil Cascade</span>
+        <span class="card-diff">Intermediate</span>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="card-body">
+        <div class="tab-section">
+          <div class="tab-label">Tab — A diminished (A C Eb)</div>
+          <div class="tab-block"><span class="c">e  |------</span><span class="r">5</span><span class="c">--------|</span>
+<span class="c">B  |----</span><span class="p">4</span><span class="c">---------|  ← Eb (flat 5 / tritone)</span>
+<span class="c">G  |--</span><span class="t">5</span><span class="c">-----------|  ← C (minor 3rd)</span>
+<span class="c">D  |-</span><span class="r">7</span><span class="c">------------|  ← A (root)</span>
+
+<span class="c">; The secret: diminished shape repeats every 3 frets</span>
+<span class="c">; Play shape at fret 7, then again at fret 10, then 13</span>
+<span class="c">; Same fingering, climbs the neck, all still "fits"</span>
+
+<span class="c">D  |-</span><span class="r">7</span><span class="c">h</span><span class="r">10</span><span class="c">h</span><span class="r">13</span><span class="c">---|  ← root climbs, shape repeats</span>
+<span class="c">G  |-</span><span class="t">5</span><span class="c">--</span><span class="t">8</span><span class="c">--</span><span class="t">11</span><span class="c">---|</span>
+<span class="c">B  |-</span><span class="p">4</span><span class="c">--</span><span class="p">7</span><span class="c">--</span><span class="p">10</span><span class="c">---|</span>
+<span class="c">e  |-</span><span class="r">5</span><span class="c">--</span><span class="r">8</span><span class="c">--</span><span class="r">11</span><span class="c">---|</span></div>
+        </div>
+        <div class="explain">
+          <p><strong>Diminished arpeggios are the Born of Osiris sound.</strong> The tritone (flat 5) inside the shape is what makes it feel unstable and cascading. And the magic property: <strong>the shape repeats identically every 3 frets</strong>, so you can sweep it once and then slide it up the neck for an instant climbing effect without changing fingering.</p>
+          <p>The tritone inside every diminished chord is your diabolus in musica — the same interval you already use in your riff. This is just that interval stacked into a sweepable shape.</p>
+          <div class="tip"><strong>Integration:</strong> Chug on string 7 → sweep diminished arpeggio ascending → land back on open A. That's a complete musical phrase. The sweep is the "breath" in the middle of the chug.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 7-STRING SWEEP using string 7 -->
+    <div class="card" onclick="toggleCard(this)">
+      <div class="card-header">
+        <span class="ctag tag-hybrid">7-String</span>
+        <span class="card-title">6-String Sweep with String 7 Root Launch</span>
+        <span class="card-diff">Intermediate</span>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="card-body">
+        <div class="tab-section">
+          <div class="tab-label">Tab — using string 7 as launchpad into sweep</div>
+          <div class="tab-block"><span class="c">; This is the 7-string advantage nobody talks about</span>
+<span class="c">; Hit the low root on str7, sweep up through the chord</span>
+
+<span class="c">A₇ |-</span><span class="r">0</span><span class="c">--------------|  ← open A root, launch note</span>
+<span class="c">E  |--</span><span class="r">7</span><span class="c">------------|  ← A (root, octave up)</span>
+<span class="c">A  |---</span><span class="r">7</span><span class="c">-----------|  ← A (root)</span>
+<span class="c">D  |----</span><span class="t">7</span><span class="c">----------|  ← C (minor 3rd)</span>
+<span class="c">G  |-----</span><span class="f">7</span><span class="c">---------|  ← E (5th) — wait, recalc</span>
+<span class="c">B  |------</span><span class="t">8</span><span class="c">--------|  ← C (minor 3rd)</span>
+<span class="c">e  |-------</span><span class="r">5</span><span class="c">h</span><span class="r">8</span><span class="c">p</span><span class="r">5</span><span class="c">--|  ← A root, hammer/pull, reverse</span>
+
+<span class="c">; Sweep direction: str7 pick → continue UP through all strings</span>
+<span class="c">; One continuous downstroke covers str7 through e</span>
+<span class="c">; Then hammer at top and reverse upstroke back down</span>
+
+<span class="c">; The low A on str7 adds WEIGHT before the sweep lifts off</span>
+<span class="c">; Sounds massive. Standard 6-string can't do this.</span></div>
+        </div>
+        <div class="explain">
+          <p><strong>This is your 7-string exclusive move.</strong> You hit the open low A as a launchpad — that deep thud — then the sweep ascends through all 6 remaining strings. It sounds enormous because the lowest possible note in the tuning launches the arpeggio.</p>
+          <p>No 6-string player can do this. It's one of the few things where the 7th string isn't just an "extra chug string" — it becomes part of the melodic architecture.</p>
+          <div class="tip"><strong>Practical tip:</strong> The str7 note will still be ringing as you sweep upward — that low A rumbles underneath the arpeggio. On high gain this creates a wall of sound effect. Control it with your palm as you move off str7.</div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /cards -->
+</div>
+
+<!-- ══ CASCADES ══ -->
+<div class="sec-content" id="sec-1">
+  <div class="integration" style="margin-top:0">
+    <div class="int-label">What an open string cascade is</div>
+    <div class="int-body">
+      Open strings ring freely while your fret hand moves. A cascade uses them as <strong>pivot points</strong> — you play a fretted note, pull off to the open string, and while that open string sustains, your hand shifts position. The overlap between the ringing open note and your next fretted note creates the <strong class="o">twinkle</strong>. Your hand is only ever in one place — the open strings do the rest.
+    </div>
+  </div>
+
+  <div class="cards" style="margin-top:16px">
+    <div class="card-label">Cascade patterns — tap to expand</div>
+
+    <!-- BASIC PULL-OFF CASCADE -->
+    <div class="card" onclick="toggleCard(this)">
+      <div class="card-header">
+        <span class="ctag tag-cascade">Cascade</span>
+        <span class="card-title">Basic Open Pull-Off Cascade (Midwest Emo Root)</span>
+        <span class="card-diff">Beginner</span>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="card-body">
+        <div class="tab-section">
+          <div class="tab-label">Tab — single string, pull to open</div>
+          <div class="tab-block"><span class="c">; Each fretted note pulls off to open string</span>
+<span class="c">; Open string rings while hand repositions</span>
+
+<span class="c">e  |-</span><span class="r">7</span><span class="c">p</span><span class="o">0</span><span class="c">---</span><span class="r">5</span><span class="c">p</span><span class="o">0</span><span class="c">---</span><span class="r">3</span><span class="c">p</span><span class="o">0</span><span class="c">---</span><span class="r">2</span><span class="c">p</span><span class="o">0</span><span class="c">--|</span>
+<span class="c">   </span><span class="r"> A</span><span class="c"> </span><span class="o"> e</span><span class="c">    </span><span class="r">G</span><span class="c"> </span><span class="o"> e</span><span class="c">    </span><span class="r">E</span><span class="c"> </span><span class="o"> e</span><span class="c">    </span><span class="r">D</span><span class="c"> </span><span class="o"> e</span>
+
+<span class="c">; That descending line (A G E D) is a melody</span>
+<span class="c">; The open e between each note is the "twinkle"</span>
+<span class="c">; Hand jumps between positions while open e rings</span></div>
+        </div>
+        <div class="explain">
+          <p>This is the midwest emo move you already know. Each pull-off to open gives your hand time to reposition without silence. The open string is <strong>buying you time</strong> while sounding musical.</p>
+          <p>In standard tuning this is on the high e. In Drop A your open strings are different — <strong class="o">open e (string 6)</strong> and <strong class="o">open A (string 7)</strong> are your most useful cascade pivots since A is your root key.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- CROSS-STRING CASCADE -->
+    <div class="card" onclick="toggleCard(this)">
+      <div class="card-header">
+        <span class="ctag tag-cascade">Cascade</span>
+        <span class="card-title">Cross-String Open Cascade (The Twinkle)</span>
+        <span class="card-diff">Intermediate</span>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="card-body">
+        <div class="tab-section">
+          <div class="tab-label">Tab — cascades across multiple strings</div>
+          <div class="tab-block"><span class="c">; Falls across strings using open notes as bridges</span>
+<span class="c">; While one string rings open, pick moves to next string</span>
+
+<span class="c">e  |-</span><span class="o">0</span><span class="c">h</span><span class="r">3</span><span class="c">h</span><span class="r">5</span><span class="c">---------</span><span class="o">0</span><span class="c">h</span><span class="r">3</span><span class="c">h</span><span class="r">5</span><span class="c">--|</span>
+<span class="c">B  |------</span><span class="r">3</span><span class="c">p</span><span class="o">0</span><span class="c">----------|</span>
+<span class="c">G  |--------</span><span class="r">2</span><span class="c">p</span><span class="o">0</span><span class="c">--------|</span>
+<span class="c">D  |----------</span><span class="r">2</span><span class="c">p</span><span class="o">0</span><span class="c">------|</span>
+
+<span class="c">; Read it as one flowing line:</span>
+<span class="c">; e: 0h3h5 → B: 3p0 → G: 2p0 → D: 2p0 → e: 0h3h5</span>
+<span class="c">; Each open string overlaps with the next fretted note</span>
+<span class="c">; creating that sustained waterfall effect</span></div>
+        </div>
+        <div class="explain">
+          <p>This is where the twinkle actually comes from. <strong>Multiple open strings overlapping</strong> — while the B string open note is still ringing, you're already fretting on G. The notes blur together in a musical way because they're all in key.</p>
+          <p>The reason it sounds hard to play is the overlap makes it sound like more notes are happening than there are. You're only ever fretting one thing at a time.</p>
+          <div class="tip"><strong>In Drop A:</strong> Your open A string (str7) adds a low resonance underneath any cascade happening on the upper strings. If you let it ring while cascading on strings 1–3, you get a full chord texture from two independent things happening.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DEATH METAL CASCADE -->
+    <div class="card" onclick="toggleCard(this)">
+      <div class="card-header">
+        <span class="ctag tag-hybrid">Death Metal</span>
+        <span class="card-title">Death Metal Cascade — Into the Chug</span>
+        <span class="card-diff">Intermediate</span>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="card-body">
+        <div class="tab-section">
+          <div class="tab-label">Tab — cascade resolves into palm muted low A</div>
+          <div class="tab-block"><span class="c">; Cascade (melodic, open, bright)</span>
+<span class="c">; then SLAM into chug (heavy, muted, dark)</span>
+<span class="c">; contrast between them is the whole point</span>
+
+<span class="c">e  |-</span><span class="o">0</span><span class="c">h</span><span class="r">5</span><span class="c">p</span><span class="o">0</span><span class="c">h</span><span class="r">3</span><span class="c">p</span><span class="o">0</span><span class="c">-----------|</span>
+<span class="c">B  |-------</span><span class="r">3</span><span class="c">p</span><span class="o">0</span><span class="c">---------|</span>
+<span class="c">G  |-----------</span><span class="f">2</span><span class="c">p</span><span class="o">0</span><span class="c">----|</span>
+<span class="c">A  |--------------|</span>
+<span class="c">E  |--------------|</span>
+<span class="c">A₇ |---------------</span><span class="r">0</span><span class="c">-</span><span class="r">0</span><span class="c">-</span><span class="r">0</span><span class="c">-</span><span class="r">0</span><span class="c">-|  PM</span>
+
+<span class="c">; cascade fills 2 bars → chug drops on bar 3</span>
+<span class="c">; that drop hits harder because of the open brightness before it</span>
+
+<span class="c">; Carcosa does exactly this between breakdown sections</span></div>
+        </div>
+        <div class="motion">
+          <div class="motion-label">Structure</div>
+          <div class="motion-grid">
+            <div class="motion-step"><div class="ms-action open-s">cascade<br>open strings<br>bright</div></div>
+            <div class="motion-step"><div class="ms-arrow">→→</div></div>
+            <div class="motion-step"><div class="ms-action down">DROP<br>chug<br>PM str7</div></div>
+            <div class="motion-step"><div class="ms-arrow">→→</div></div>
+            <div class="motion-step"><div class="ms-action open-s">cascade<br>again</div></div>
+            <div class="motion-step"><div class="ms-arrow">→→</div></div>
+            <div class="motion-step"><div class="ms-action down">DROP<br>harder</div></div>
+          </div>
+        </div>
+        <div class="explain">
+          <p><strong>The contrast is the technique.</strong> An open string cascade is bright, melodic, and airy. A palm muted chug on string 7 is dark, dead, and heavy. Putting them back to back makes each one hit harder than it would alone.</p>
+          <p>This is the deathcore answer to the midwest emo twinkle — same mechanical idea, completely different emotional context because of what comes after it.</p>
+          <div class="tip"><strong>Your specific riff context:</strong> Take your current tritone chug riff. Before the power chord stab, insert a 2-beat open cascade on strings 1–3. Then let the power chord land. The cascade makes the stab feel like a punch instead of just a note.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 7-STRING OPEN CASCADE -->
+    <div class="card" onclick="toggleCard(this)">
+      <div class="card-header">
+        <span class="ctag tag-hybrid">7-String</span>
+        <span class="card-title">String 7 Open Root Cascade (Your Exclusive)</span>
+        <span class="card-diff">Intermediate</span>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="card-body">
+        <div class="tab-section">
+          <div class="tab-label">Tab — open A7 drones under upper string cascade</div>
+          <div class="tab-block"><span class="c">; Let str7 ring open while cascading above it</span>
+<span class="c">; Two independent voices simultaneously</span>
+
+<span class="c">e  |--</span><span class="r">5</span><span class="c">p</span><span class="o">0</span><span class="c">h</span><span class="r">3</span><span class="c">p</span><span class="o">0</span><span class="c">---------|</span>
+<span class="c">B  |--------</span><span class="r">3</span><span class="c">p</span><span class="o">0</span><span class="c">-----|</span>
+<span class="c">G  |------------</span><span class="f">2</span><span class="c">p</span><span class="o">0</span><span class="c">|</span>
+<span class="c">D  |---------------|</span>
+<span class="c">A  |---------------|</span>
+<span class="c">E  |---------------|</span>
+<span class="c">A₇ |-</span><span class="o">0</span><span class="c">-----------</span><span class="o">0</span><span class="c">--|  ← open A, let ring under everything</span>
+
+<span class="c">; Hit str7 open, let it drone</span>
+<span class="c">; Immediately cascade up on strings 1-3</span>
+<span class="c">; Low A rumbles under the high twinkle</span>
+<span class="c">; Sounds like two guitarists</span>
+
+<span class="c">; Pluck str7 with thumb (hybrid picking) while</span>
+<span class="c">; fingers handle the upper cascade — advanced</span>
+<span class="c">; OR just hit str7 and quickly mute after 1 beat</span></div>
+        </div>
+        <div class="explain">
+          <p><strong>This is genuinely something 6-string players cannot do.</strong> The open low A drones underneath while a melodic cascade happens on the high strings. It sounds like rhythm and lead guitar simultaneously from one instrument.</p>
+          <p>The easier version: pick str7 open, let it ring for one beat, then cascade on the high strings while the low A fades naturally. You don't need to sustain it perfectly — even the decay of the low A adds weight.</p>
+          <div class="tip"><strong>Hybrid picking path:</strong> If you eventually learn hybrid picking (pick + middle/ring fingers), you can hold the low A drone with your pick while fingers cascade above. That's a longer term goal but worth knowing it exists.</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══ INTEGRATION ══ -->
+<div class="sec-content" id="sec-2">
+  <div style="padding:16px 20px 0">
+
+    <div class="integration" style="margin:0 0 12px">
+      <div class="int-label">The core principle</div>
+      <div class="int-body">
+        Sweeps and cascades aren't songs — they're <strong>punctuation</strong>. One sweep inside a chug riff hits harder than constant sweeping. A cascade before a breakdown drop creates contrast that makes the drop feel heavier. Use them sparingly and intentionally.
+      </div>
+    </div>
+
+    <div class="card open" style="cursor:default">
+      <div class="card-header">
+        <span class="ctag tag-hybrid">Template</span>
+        <span class="card-title">Full Riff Integration — Chug + Cascade + Sweep</span>
+        <span class="card-diff">Your next goal</span>
+      </div>
+      <div class="card-body">
+        <div class="tab-section">
+          <div class="tab-label">Tab — 4 bar phrase combining everything</div>
+          <div class="tab-block"><span class="c">; BAR 1-2: Your chug riff (what you already have)</span>
+<span class="c">e  |----------------------------</span><span class="r">5</span><span class="c">--</span><span class="r">1</span><span class="c">--|</span>
+<span class="c">A₇ |-</span><span class="r">0</span><span class="c">-</span><span class="r">0</span><span class="c">-</span><span class="r">0</span><span class="c">-</span><span class="r">0</span><span class="c">-</span><span class="r">0</span><span class="c">-</span><span class="r">0</span><span class="c">-</span><span class="r">0</span><span class="c">-</span><span class="r">0</span><span class="c">------------|  PM</span>
+<span class="c">                         </span><span class="p">^^tritone stab</span>
+
+<span class="c">; BAR 3: Open cascade (bright contrast, hand moves up neck)</span>
+<span class="c">e  |-</span><span class="o">0</span><span class="c">h</span><span class="r">5</span><span class="c">p</span><span class="o">0</span><span class="c">h</span><span class="r">3</span><span class="c">p</span><span class="o">0</span><span class="c">h</span><span class="r">2</span><span class="c">p</span><span class="o">0</span><span class="c">-----------|</span>
+<span class="c">B  |-----------</span><span class="r">3</span><span class="c">p</span><span class="o">0</span><span class="c">-------|</span>
+<span class="c">A₇ |-</span><span class="o">0</span><span class="c">--------------------|  let ring under cascade</span>
+
+<span class="c">; BAR 4: Sweep into chug drop</span>
+<span class="c">A  |--</span><span class="r">7</span><span class="c">-----------------|  ↓ sweep starts</span>
+<span class="c">D  |---</span><span class="t">7</span><span class="c">----------------|</span>
+<span class="c">G  |----</span><span class="f">5</span><span class="c">---------------|</span>
+<span class="c">B  |-----</span><span class="t">5</span><span class="c">--------------|</span>
+<span class="c">e  |------</span><span class="r">5</span><span class="c">h</span><span class="r">8</span><span class="c">p</span><span class="r">5</span><span class="c">↑---------|  ↑ reverse, then:</span>
+<span class="c">A₇ |-----------</span><span class="r">0</span><span class="c">-</span><span class="r">0</span><span class="c">-</span><span class="r">0</span><span class="c">-</span><span class="r">0</span><span class="c">-|  PM chug drops, loop</span>
+
+<span class="c">; Bar 1-2: establish (chug)</span>
+<span class="c">; Bar 3:   breathe  (cascade)</span>
+<span class="c">; Bar 4:   punctuate (sweep) → slam back to chug</span>
+<span class="c">; Repeat — the loop hits harder each time</span></div>
+        </div>
+        <div class="explain">
+          <p><strong>Bar 1–2</strong> is your existing riff. You already have this. <strong>Bar 3</strong> is new — an open cascade that lifts the texture and gives the listener a moment of melodic air before the weight returns. <strong>Bar 4</strong> is the sweep punctuating the return to the chug.</p>
+          <p>The whole 4-bar phrase tells a micro-story: <strong>establish → contrast → punctuate → return.</strong> That's a complete musical idea. String four of these together with variation and you have a full song section.</p>
+          <div class="tip"><strong>Learn it in pieces:</strong> Don't try the full 4 bars immediately. Get bar 1-2 clean first (you already have it). Add bar 3 cascade next week. Add the bar 4 sweep the week after. By the time you chain them together each piece will already be in muscle memory.</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="bottom-pad"></div>
+
+<script>
+function setSection(idx) {
+  document.querySelectorAll('.sec-tab').forEach((t,i)=>t.classList.toggle('active',i===idx));
+  document.querySelectorAll('.sec-content').forEach((c,i)=>c.classList.toggle('active',i===idx));
+}
+function toggleCard(card) {
+  card.classList.toggle('open');
+}
+</script>
+</body>
+</html>

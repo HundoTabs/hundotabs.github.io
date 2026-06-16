@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Intervals to Notes — Reference & File Namer</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Inter:wght@300;400;500;600&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#09090b;--surface:#111115;--surface2:#17171c;
+  --border:#21212a;--border2:#2a2a35;
+  --text:#e0deda;--muted:#52505f;--dim:#2a2a35;
+  --red:#b83228;--red-dim:rgba(184,50,40,0.13);
+  --blue:#1a6fa8;--blue-dim:rgba(26,111,168,0.13);
+  --green:#1a8048;--green-dim:rgba(26,128,72,0.13);
+  --amber:#c07820;--amber-dim:rgba(192,120,32,0.13);
+  --purple:#7040c0;--purple-dim:rgba(112,64,192,0.13);
+  --mono:'Space Mono',monospace;--sans:'Inter',sans-serif;
+}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh}
+
+.header{padding:24px 20px 18px;border-bottom:1px solid var(--border);position:relative;overflow:hidden}
+.header::after{content:'REF';position:absolute;right:-4px;top:-6px;font-family:var(--mono);font-size:80px;font-weight:700;color:var(--border);pointer-events:none;user-select:none;line-height:1}
+.eyebrow{font-family:var(--mono);font-size:9px;letter-spacing:0.25em;text-transform:uppercase;color:var(--muted);margin-bottom:5px}
+h1{font-family:var(--mono);font-size:17px;font-weight:700;line-height:1.2;margin-bottom:3px}
+.header-sub{font-size:11px;color:var(--muted)}
+
+.key-strip{padding:12px 20px;border-bottom:1px solid var(--border);background:var(--surface)}
+.key-strip-label{font-family:var(--mono);font-size:9px;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.key-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:5px}
+.key-btn{font-family:var(--mono);font-size:11px;font-weight:700;padding:9px 4px;background:var(--surface2);border:1px solid var(--border);color:var(--muted);cursor:pointer;transition:all 0.12s;text-align:center}
+.key-btn:hover{border-color:var(--border2);color:var(--text)}
+.key-btn.active{background:var(--red);border-color:var(--red);color:#fff}
+.key-btn small{display:block;font-size:8px;opacity:0.6;margin-top:1px}
+
+.mode-strip{display:flex;border-bottom:1px solid var(--border)}
+.mode-btn{flex:1;font-family:var(--mono);font-size:9px;letter-spacing:0.06em;text-transform:uppercase;padding:9px 6px;background:transparent;border:none;border-right:1px solid var(--border);color:var(--muted);cursor:pointer;transition:all 0.12s;text-align:center}
+.mode-btn:last-child{border-right:none}
+.mode-btn:hover{color:var(--text)}
+.mode-btn.active{color:var(--text);background:var(--surface2);border-bottom:2px solid var(--blue)}
+
+.sec-nav{display:flex;border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none}
+.sec-nav::-webkit-scrollbar{display:none}
+.sec-btn{font-family:var(--mono);font-size:9px;letter-spacing:0.08em;text-transform:uppercase;padding:10px 14px;background:transparent;border:none;border-right:1px solid var(--border);color:var(--muted);cursor:pointer;white-space:nowrap;transition:all 0.12s;flex-shrink:0}
+.sec-btn:hover{color:var(--text)}
+.sec-btn.active{color:var(--text);background:var(--surface2);border-bottom:2px solid var(--red)}
+.sec-content{display:none;padding:16px 20px}
+.sec-content.active{display:block}
+
+.lookup-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:16px}
+.lookup-card{background:var(--surface);border:1px solid var(--border);padding:12px 13px}
+.lc-roman{font-family:var(--mono);font-size:20px;font-weight:700;line-height:1;margin-bottom:4px}
+.lc-roman.minor{color:var(--red)}
+.lc-roman.major{color:var(--blue)}
+.lc-roman.dim{color:var(--purple)}
+.lc-roman.aug{color:var(--amber)}
+.lc-note{font-family:var(--mono);font-size:26px;font-weight:700;color:var(--text);line-height:1;margin-bottom:4px}
+.lc-name{font-size:10px;color:var(--muted);margin-bottom:4px}
+.lc-quality{font-family:var(--mono);font-size:8px;padding:2px 6px;display:inline-block}
+.qb-min{background:var(--red-dim);color:#e06050;border:1px solid var(--red)}
+.qb-maj{background:var(--blue-dim);color:#60a0d8;border:1px solid var(--blue)}
+.qb-dim{background:var(--purple-dim);color:#a070e0;border:1px solid var(--purple)}
+.qb-aug{background:var(--amber-dim);color:#d09040;border:1px solid var(--amber)}
+.qb-sus{background:var(--dim);color:#888;border:1px solid var(--border2)}
+.lc-semitone{font-family:var(--mono);font-size:9px;color:var(--muted);margin-top:4px}
+.lc-feel{font-size:10px;color:var(--muted);margin-top:3px;line-height:1.4}
+
+.scale-strip{display:flex;gap:0;margin-bottom:16px;overflow-x:auto;border:1px solid var(--border);scrollbar-width:none}
+.scale-strip::-webkit-scrollbar{display:none}
+.scale-note{flex:1;min-width:44px;display:flex;flex-direction:column;align-items:center;padding:10px 4px;border-right:1px solid var(--border);text-align:center}
+.scale-note:last-child{border-right:none}
+.sn-note{font-family:var(--mono);font-size:14px;font-weight:700;color:var(--text);line-height:1;margin-bottom:3px}
+.sn-roman{font-family:var(--mono);font-size:9px;margin-bottom:2px}
+.sn-roman.minor{color:var(--red)}
+.sn-roman.major{color:var(--blue)}
+.sn-roman.dim{color:var(--purple)}
+.sn-degree{font-size:8px;color:var(--muted)}
+
+.tip-box{border-left:2px solid var(--red);padding:10px 13px;background:var(--surface);font-size:11px;color:var(--muted);line-height:1.7;margin-bottom:12px}
+.tip-box strong{color:var(--text);font-weight:500}
+
+.table-wrap{overflow-x:auto;margin-bottom:20px;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
+.table-wrap::-webkit-scrollbar{height:3px}
+.table-wrap::-webkit-scrollbar-thumb{background:var(--border)}
+table{width:100%;border-collapse:collapse;min-width:520px}
+thead tr{border-bottom:2px solid var(--border2)}
+th{font-family:var(--mono);font-size:8px;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);padding:8px 10px;text-align:left;font-weight:400;border-right:1px solid var(--border)}
+th:last-child{border-right:none}
+td{padding:10px 10px;font-size:11px;border-bottom:1px solid var(--border);border-right:1px solid var(--border);vertical-align:top;line-height:1.5}
+td:last-child{border-right:none}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--surface2)}
+.t-roman{font-family:var(--mono);font-size:14px;font-weight:700}
+.t-roman.minor{color:var(--red)}
+.t-roman.major{color:var(--blue)}
+.t-roman.dim{color:var(--purple)}
+.t-note{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--text)}
+.t-name{font-size:10px;color:var(--muted)}
+.t-feel{font-size:10px;color:var(--muted);line-height:1.6}
+.t-feel strong{color:var(--text);font-weight:500}
+.divider-row td{background:var(--surface2);font-family:var(--mono);font-size:8px;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);padding:5px 10px}
+
+.namer{background:var(--surface);border:1px solid var(--border);padding:16px}
+.namer-title{font-family:var(--mono);font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
+.namer-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;align-items:flex-start}
+.namer-label{font-family:var(--mono);font-size:9px;color:var(--muted);width:70px;flex-shrink:0;text-transform:uppercase;letter-spacing:0.08em;padding-top:6px}
+.tag-group{display:flex;gap:4px;flex-wrap:wrap;flex:1}
+.tag-btn{font-family:var(--mono);font-size:10px;padding:5px 9px;background:var(--surface2);border:1px solid var(--border);color:var(--muted);cursor:pointer;transition:all 0.1s;user-select:none}
+.tag-btn:hover{border-color:var(--border2);color:var(--text)}
+.tag-btn.sel{background:var(--red-dim);border-color:var(--red);color:var(--text)}
+.tag-btn.sel.smaj{background:var(--blue-dim);border-color:var(--blue)}
+.tag-btn.sel.sdim{background:var(--purple-dim);border-color:var(--purple)}
+.tag-btn.sel.sext{background:var(--green-dim);border-color:var(--green)}
+.tag-btn.sel.sfeel{background:var(--amber-dim);border-color:var(--amber)}
+.namer-input{font-family:var(--mono);font-size:11px;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:6px 10px;flex:1;min-width:60px;outline:none}
+.namer-input:focus{border-color:var(--border2)}
+.namer-input::placeholder{color:var(--muted)}
+.output-label{font-family:var(--mono);font-size:8px;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);margin-bottom:5px;margin-top:12px}
+.output-box{background:var(--bg);border:1px solid var(--border);padding:12px 14px;font-family:var(--mono);font-size:12px;color:var(--text);letter-spacing:0.02em;min-height:36px;word-break:break-all;line-height:1.6}
+.copy-btn{font-family:var(--mono);font-size:9px;letter-spacing:0.1em;text-transform:uppercase;padding:7px 14px;background:transparent;border:1px solid var(--border);color:var(--muted);cursor:pointer;margin-top:8px;transition:all 0.12s}
+.copy-btn:hover{border-color:var(--border2);color:var(--text)}
+.copy-btn.copied{border-color:var(--green);color:#40c080}
+
+.quick-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:16px}
+.qcard{background:var(--surface);border:1px solid var(--border);padding:11px 13px}
+.qcard-title{font-family:var(--mono);font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.qcard-content{font-size:11px;color:var(--muted);line-height:1.8}
+.qcard-content strong{color:var(--text);font-weight:500;font-family:var(--mono)}
+
+.bottom-pad{height:48px}
+@media(max-width:480px){.lookup-grid{grid-template-columns:1fr}.quick-grid{grid-template-columns:1fr}.key-grid{grid-template-columns:repeat(4,1fr)}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="eyebrow">Theory Reference · Drop A / 7-String</div>
+  <h1>Intervals to Actual Notes</h1>
+  <p class="header-sub">Pick your root key — every interval shows its real note name instantly</p>
+</div>
+
+<div class="key-strip">
+  <div class="key-strip-label">Root key — changes all note names below</div>
+  <div class="key-grid" id="keyGrid"></div>
+</div>
+
+<div class="mode-strip">
+  <button class="mode-btn active" onclick="setMode(0)">Natural Minor</button>
+  <button class="mode-btn" onclick="setMode(1)">Major</button>
+  <button class="mode-btn" onclick="setMode(2)">Phrygian Dom</button>
+  <button class="mode-btn" onclick="setMode(3)">Minor Penta</button>
+</div>
+
+<div class="sec-nav">
+  <button class="sec-btn active" onclick="setTab(0)">Note Lookup</button>
+  <button class="sec-btn" onclick="setTab(1)">Full Table</button>
+  <button class="sec-btn" onclick="setTab(2)">File Namer</button>
+  <button class="sec-btn" onclick="setTab(3)">Quick Ref</button>
+</div>
+
+<div class="sec-content active" id="tab0">
+  <div class="tip-box" id="modeTip"></div>
+  <div class="scale-strip" id="scaleStrip"></div>
+  <div class="lookup-grid" id="lookupGrid"></div>
+</div>
+
+<div class="sec-content" id="tab1">
+  <div class="tip-box">
+    <strong>Reading the table:</strong> The Note column updates when you change the root key above. Roman numeral, quality, and feel are fixed — only the actual note name changes per key.
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Symbol</th><th>Note (your key)</th><th>Quality</th><th>Degree name</th><th>Feel / Use</th></tr></thead>
+      <tbody id="fullTableBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<div class="sec-content" id="tab2">
+  <div class="tip-box">
+    <strong>Tap intervals in the order they appear in your sample.</strong> Note names show in brackets next to each selected interval. Copy the filename at the bottom into your DAW.
+  </div>
+  <div class="namer">
+    <div class="namer-title">Sample File Name Builder — key: <span id="namerKeyLabel">Am</span></div>
+    <div class="namer-row">
+      <span class="namer-label">Intervals</span>
+      <div class="tag-group" id="intervalTags"></div>
+    </div>
+    <div class="namer-row">
+      <span class="namer-label">Mode</span>
+      <div class="tag-group"><span style="font-family:var(--mono);font-size:11px;color:var(--text);padding:5px 0" id="namerModeLabel">nat-minor</span></div>
+    </div>
+    <div class="namer-row">
+      <span class="namer-label">BPM</span>
+      <input class="namer-input" id="bpmInput" type="number" placeholder="140" min="40" max="280" oninput="updateOutput()">
+    </div>
+    <div class="namer-row">
+      <span class="namer-label">Technique</span>
+      <div class="tag-group" id="techTags"></div>
+    </div>
+    <div class="namer-row">
+      <span class="namer-label">Section</span>
+      <div class="tag-group" id="sectionTags"></div>
+    </div>
+    <div class="namer-row">
+      <span class="namer-label">Note</span>
+      <input class="namer-input" id="noteInput" type="text" placeholder="optional..." oninput="updateOutput()">
+    </div>
+    <div class="output-label">Generated filename</div>
+    <div class="output-box" id="outputBox">—</div>
+    <button class="copy-btn" id="copyBtn" onclick="copyOutput()">Copy filename</button>
+  </div>
+</div>
+
+<div class="sec-content" id="tab3">
+  <div class="quick-grid">
+    <div class="qcard">
+      <div class="qcard-title">Lowercase = minor</div>
+      <div class="qcard-content"><strong>i iv v ii°</strong> are minor chords<br>Dark, heavy, the natural home<br><br>In A minor:<br><strong>i</strong> = Am &nbsp; <strong>iv</strong> = Dm<br><strong>v</strong> = Em &nbsp; <strong>ii°</strong> = B dim</div>
+    </div>
+    <div class="qcard">
+      <div class="qcard-title">Uppercase = major</div>
+      <div class="qcard-content"><strong>III VI VII</strong> are major chords<br>Brighter even inside a minor key<br><br>In A minor:<br><strong>III</strong> = C &nbsp; <strong>VI</strong> = F<br><strong>VII</strong> = G</div>
+    </div>
+    <div class="qcard">
+      <div class="qcard-title">Why notes change by key</div>
+      <div class="qcard-content"><strong>i</strong> is always the root note<br>In Am: i = A<br>In Dm: i = D<br>In Em: i = E<br><br>The interval is relative.<br>The note is absolute.</div>
+    </div>
+    <div class="qcard">
+      <div class="qcard-title">Your most-used intervals</div>
+      <div class="qcard-content"><strong>i</strong> = home / anchor<br><strong>bV</strong> = tritone, devil interval<br><strong>VI</strong> = melancholic lift<br><strong>VII</strong> = forward momentum<br><strong>bII</strong> = Phrygian jab<br><strong>iv</strong> = heavy doomy pull</div>
+    </div>
+    <div class="qcard">
+      <div class="qcard-title">Filename convention</div>
+      <div class="qcard-content"><strong>i-VII-VI-v_Am_140bpm_alt-pick_verse</strong><br><br>Intervals first (in order played)<br>Then key, bpm, technique, section<br>Underscores between groups<br>Hyphens within groups</div>
+    </div>
+    <div class="qcard">
+      <div class="qcard-title">CAGED quality rule</div>
+      <div class="qcard-content">Pick your mode = quality fixed<br>Natural minor: i iv v = minor<br>Natural minor: III VI VII = major<br><br>Red dot = root = i<br>Always minor in nat. minor</div>
+    </div>
+  </div>
+</div>
+
+<div class="bottom-pad"></div>
+
+<script>
+var NOTES = ['A','Bb','B','C','C#','D','Eb','E','F','F#','G','Ab'];
+var NOTE_DISPLAY = ['A','A#/Bb','B','C','C#/Db','D','D#/Eb','E','F','F#/Gb','G','G#/Ab'];
+
+var MODES = {
+  0: {
+    label:'Natural Minor', slug:'nat-minor',
+    tip:'In natural minor, <strong>i iv v</strong> are always minor (lowercase). <strong>III VI VII</strong> are always major (uppercase). <strong>ii\u00b0</strong> is diminished. The key you pick above determines what actual note each degree lands on.',
+    degrees:[
+      {r:'i',   s:0,  q:'min', name:'Tonic',      feel:'Home. Anchor. Everything resolves here.'},
+      {r:'ii\u00b0', s:2, q:'dim', name:'Supertonic', feel:'Unstable, passing, dark connector.'},
+      {r:'III', s:3,  q:'maj', name:'Mediant',     feel:'Bright lift — relative major.'},
+      {r:'iv',  s:5,  q:'min', name:'Subdominant', feel:'Dark, heavy, doomy pull.'},
+      {r:'v',   s:7,  q:'min', name:'Dominant',    feel:'Tension wanting to resolve back to i.'},
+      {r:'VI',  s:8,  q:'maj', name:'Submediant',  feel:'Melancholic. The sad but crushing chord.'},
+      {r:'VII', s:10, q:'maj', name:'Subtonic',    feel:'Forward momentum. Drive toward i.'},
+    ]
+  },
+  1: {
+    label:'Major', slug:'major',
+    tip:'In major, <strong>I IV V</strong> are major (uppercase). <strong>ii iii vi</strong> are minor (lowercase). <strong>vii\u00b0</strong> is diminished. Much brighter overall.',
+    degrees:[
+      {r:'I',    s:0,  q:'maj', name:'Tonic',       feel:'Home. Bright and resolved.'},
+      {r:'ii',   s:2,  q:'min', name:'Supertonic',  feel:'Minor quality adds subtle darkness.'},
+      {r:'iii',  s:4,  q:'min', name:'Mediant',     feel:'Soft minor — often a passing chord.'},
+      {r:'IV',   s:5,  q:'maj', name:'Subdominant', feel:'Lift and forward motion.'},
+      {r:'V',    s:7,  q:'maj', name:'Dominant',    feel:'Strong tension, wants to resolve to I.'},
+      {r:'vi',   s:9,  q:'min', name:'Submediant',  feel:'Relative minor — familiar dark touch.'},
+      {r:'vii\u00b0', s:11, q:'dim', name:'Leading tone', feel:'Maximum tension before resolution.'},
+    ]
+  },
+  2: {
+    label:'Phrygian Dominant', slug:'phrygian',
+    tip:'Phrygian dominant is built on the <strong>\u266dII</strong> — one fret above the root. It sounds ancient, sinister, and menacing.',
+    degrees:[
+      {r:'I',    s:0,  q:'maj', name:'Tonic',        feel:'Home — unusually major for a dark mode.'},
+      {r:'\u266dII', s:1, q:'maj', name:'Phrygian jab', feel:'The defining note. Ancient, sinister, evil.'},
+      {r:'iii\u00b0', s:4, q:'dim', name:'Mediant',   feel:'Diminished — unstable passing point.'},
+      {r:'iv',   s:5,  q:'min', name:'Subdominant',   feel:'Dark minor pull.'},
+      {r:'v',    s:7,  q:'min', name:'Dominant',      feel:'Tension, suspended feeling.'},
+      {r:'\u266dVI', s:8, q:'maj', name:'Submediant', feel:'Major contrast — brief lift.'},
+      {r:'\u266dVII', s:10, q:'min', name:'Subtonic', feel:'Minor drive — pushes toward i.'},
+    ]
+  },
+  3: {
+    label:'Minor Pentatonic', slug:'penta',
+    tip:'Pentatonic strips the scale to 5 notes. Fewer tension points, cleaner sound. Every note is safe to land on.',
+    degrees:[
+      {r:'i',   s:0,  q:'min', name:'Root',      feel:'Home.'},
+      {r:'III', s:3,  q:'maj', name:'Minor 3rd', feel:'Flat 3rd — the blues/rock note.'},
+      {r:'iv',  s:5,  q:'min', name:'Fourth',    feel:'Dark pull.'},
+      {r:'v',   s:7,  q:'min', name:'Fifth',     feel:'Open, strong.'},
+      {r:'VII', s:10, q:'maj', name:'Minor 7th', feel:'Drive and momentum.'},
+    ]
+  }
+};
+
+var CHROMATIC = [
+  {r:'\u266dII',    s:1, q:'maj', name:'Neapolitan / Phrygian b2', feel:'<strong>The Phrygian jab.</strong> One fret above root. Sinister, ancient.'},
+  {r:'\u266dV',     s:6, q:'dim', name:'Tritone / Diabolus in musica', feel:'<strong>Devil interval.</strong> Max dissonance. Fret 6 str7 in Drop A.'},
+  {r:'IV',          s:5, q:'maj', name:'Major subdominant (borrowed)', feel:'Borrowed from major — brighter than iv.'},
+  {r:'I+',          s:0, q:'aug', name:'Augmented tonic', feel:'Raised 5th — floating, unstable, sci-fi.'},
+  {r:'sus2',        s:0, q:'sus', name:'Suspended 2nd', feel:'No third — open and ambiguous.'},
+];
+
+var TECHS = ['alt-pick','palm-mute','gallop','triplet','sweep','cascade','open','breakdown','riff','arp'];
+var SECTIONS = ['verse','breakdown','bridge','intro','outro','transition','loop','stab'];
+
+var currentKey = 0;
+var currentMode = 0;
+var selIntervals = [];
+var selTech = [];
+var selSection = [];
+
+function noteAt(offset) {
+  return NOTES[(currentKey + offset + 120) % 12];
+}
+
+function qualClass(q) {
+  if (q === 'min') return 'minor';
+  if (q === 'maj') return 'major';
+  if (q === 'dim') return 'dim';
+  if (q === 'aug') return 'aug';
+  return '';
+}
+
+function qualBadge(q) {
+  var classes = {min:'qb-min',maj:'qb-maj',dim:'qb-dim',aug:'qb-aug',sus:'qb-sus'};
+  var labels  = {min:'minor',maj:'major',dim:'dim',aug:'aug',sus:'sus'};
+  return '<span class="lc-quality ' + (classes[q]||'') + '">' + (labels[q]||q) + '</span>';
+}
+
+function buildKeyGrid() {
+  var g = document.getElementById('keyGrid');
+  g.innerHTML = '';
+  for (var i = 0; i < NOTE_DISPLAY.length; i++) {
+    (function(idx) {
+      var n = NOTE_DISPLAY[idx];
+      var btn = document.createElement('button');
+      btn.className = 'key-btn' + (idx === 0 ? ' active' : '');
+      var parts = n.split('/');
+      btn.innerHTML = parts[0] + (parts[1] ? '<small>' + parts[1] + '</small>' : '<small>&nbsp;</small>');
+      btn.onclick = function() { currentKey = idx; updateKeyGrid(); renderAll(); };
+      g.appendChild(btn);
+    })(i);
+  }
+}
+
+function updateKeyGrid() {
+  var btns = document.querySelectorAll('.key-btn');
+  for (var i = 0; i < btns.length; i++) {
+    btns[i].classList.toggle('active', i === currentKey);
+  }
+}
+
+function setMode(idx) {
+  currentMode = idx;
+  var btns = document.querySelectorAll('.mode-btn');
+  for (var i = 0; i < btns.length; i++) {
+    btns[i].classList.toggle('active', i === idx);
+  }
+  selIntervals = [];
+  renderAll();
+}
+
+function setTab(idx) {
+  var sbns = document.querySelectorAll('.sec-btn');
+  var scts = document.querySelectorAll('.sec-content');
+  for (var i = 0; i < sbns.length; i++) {
+    sbns[i].classList.toggle('active', i === idx);
+    scts[i].classList.toggle('active', i === idx);
+  }
+}
+
+function renderAll() {
+  var mode = MODES[currentMode];
+  document.getElementById('modeTip').innerHTML = mode.tip;
+  var keyName = NOTES[currentKey];
+  var isMinor = (currentMode === 0 || currentMode === 2 || currentMode === 3);
+  document.getElementById('namerKeyLabel').textContent = keyName + (isMinor ? 'm' : '');
+  document.getElementById('namerModeLabel').textContent = mode.slug;
+  renderScaleStrip();
+  renderLookupCards();
+  renderFullTable();
+  renderIntervalTags();
+  updateOutput();
+}
+
+function renderScaleStrip() {
+  var strip = document.getElementById('scaleStrip');
+  var mode = MODES[currentMode];
+  var html = '';
+  for (var i = 0; i < mode.degrees.length; i++) {
+    var deg = mode.degrees[i];
+    var note = noteAt(deg.s);
+    var qc = qualClass(deg.q);
+    var degWord = deg.name.split(' ')[0];
+    html += '<div class="scale-note">';
+    html += '<div class="sn-note">' + note + '</div>';
+    html += '<div class="sn-roman ' + qc + '">' + deg.r + '</div>';
+    html += '<div class="sn-degree">' + degWord + '</div>';
+    html += '</div>';
+  }
+  strip.innerHTML = html;
+}
+
+function renderLookupCards() {
+  var grid = document.getElementById('lookupGrid');
+  var mode = MODES[currentMode];
+  var html = '';
+  for (var i = 0; i < mode.degrees.length; i++) {
+    var deg = mode.degrees[i];
+    var note = noteAt(deg.s);
+    var qc = qualClass(deg.q);
+    html += '<div class="lookup-card">';
+    html += '<div class="lc-roman ' + qc + '">' + deg.r + '</div>';
+    html += '<div class="lc-note">' + note + '</div>';
+    html += '<div class="lc-name">' + deg.name + '</div>';
+    html += qualBadge(deg.q);
+    html += '<div class="lc-semitone">+' + deg.s + ' semitones from root</div>';
+    html += '<div class="lc-feel">' + deg.feel + '</div>';
+    html += '</div>';
+  }
+  grid.innerHTML = html;
+}
+
+function renderFullTable() {
+  var tbody = document.getElementById('fullTableBody');
+  var mode = MODES[currentMode];
+  var html = '<tr class="divider-row"><td colspan="5">-- ' + mode.label + ' scale degrees --</td></tr>';
+  for (var i = 0; i < mode.degrees.length; i++) {
+    var deg = mode.degrees[i];
+    var note = noteAt(deg.s);
+    var qc = qualClass(deg.q);
+    html += '<tr>';
+    html += '<td><span class="t-roman ' + qc + '">' + deg.r + '</span></td>';
+    html += '<td><span class="t-note">' + note + '</span></td>';
+    html += '<td>' + qualBadge(deg.q) + '</td>';
+    html += '<td><span class="t-name">' + deg.name + '</span></td>';
+    html += '<td><span class="t-feel">' + deg.feel + '</span></td>';
+    html += '</tr>';
+  }
+  html += '<tr class="divider-row"><td colspan="5">-- Chromatic / borrowed (any mode) --</td></tr>';
+  for (var j = 0; j < CHROMATIC.length; j++) {
+    var cdeg = CHROMATIC[j];
+    var cnote = noteAt(cdeg.s);
+    var cqc = qualClass(cdeg.q);
+    html += '<tr>';
+    html += '<td><span class="t-roman ' + cqc + '">' + cdeg.r + '</span></td>';
+    html += '<td><span class="t-note">' + cnote + '</span></td>';
+    html += '<td>' + qualBadge(cdeg.q) + '</td>';
+    html += '<td><span class="t-name">' + cdeg.name + '</span></td>';
+    html += '<td><span class="t-feel">' + cdeg.feel + '</span></td>';
+    html += '</tr>';
+  }
+  tbody.innerHTML = html;
+}
+
+function renderIntervalTags() {
+  var container = document.getElementById('intervalTags');
+  var mode = MODES[currentMode];
+  container.innerHTML = '';
+
+  var allDegs = mode.degrees.concat([CHROMATIC[0], CHROMATIC[1]]);
+  for (var i = 0; i < allDegs.length; i++) {
+    (function(deg) {
+      var note = noteAt(deg.s);
+      var qc = qualClass(deg.q);
+      var isSel = selIntervals.indexOf(deg.r) !== -1;
+      var btn = document.createElement('button');
+      var cls = 'tag-btn';
+      if (isSel) {
+        cls += ' sel';
+        if (qc === 'major') cls += ' smaj';
+        else if (qc === 'dim') cls += ' sdim';
+      }
+      btn.className = cls;
+      btn.innerHTML = deg.r + ' <span style="opacity:0.6;font-size:8px">' + note + '</span>';
+      btn.onclick = function() { toggleInterval(deg.r); };
+      container.appendChild(btn);
+    })(allDegs[i]);
+  }
+}
+
+function toggleInterval(val) {
+  var idx = selIntervals.indexOf(val);
+  if (idx === -1) selIntervals.push(val);
+  else selIntervals.splice(idx, 1);
+  renderIntervalTags();
+  updateOutput();
+}
+
+function buildSimpleTags(containerId, items, selArr, cls) {
+  var container = document.getElementById(containerId);
+  container.innerHTML = '';
+  for (var i = 0; i < items.length; i++) {
+    (function(val) {
+      var btn = document.createElement('button');
+      var isSel = selArr.indexOf(val) !== -1;
+      btn.className = 'tag-btn' + (isSel ? ' sel ' + cls : '');
+      btn.textContent = val;
+      btn.onclick = function() {
+        var idx = selArr.indexOf(val);
+        if (idx === -1) { selArr.push(val); btn.className = 'tag-btn sel ' + cls; }
+        else { selArr.splice(idx, 1); btn.className = 'tag-btn'; }
+        updateOutput();
+      };
+      container.appendChild(btn);
+    })(items[i]);
+  }
+}
+
+function updateOutput() {
+  var keyName = NOTES[currentKey];
+  var mode = MODES[currentMode];
+  var isMinor = (currentMode === 0 || currentMode === 2 || currentMode === 3);
+  var keySlug = keyName + (isMinor ? 'm' : '');
+  var bpm = document.getElementById('bpmInput').value || '';
+  var noteVal = document.getElementById('noteInput').value.trim().replace(/\s+/g, '-') || '';
+
+  var allDegs = mode.degrees.concat(CHROMATIC);
+  var intervalStr = selIntervals.map(function(r) {
+    var found = null;
+    for (var i = 0; i < allDegs.length; i++) {
+      if (allDegs[i].r === r) { found = allDegs[i]; break; }
+    }
+    var n = found ? noteAt(found.s) : '';
+    return r + (n ? '(' + n + ')' : '');
+  }).join('-');
+
+  var parts = [];
+  if (intervalStr) parts.push(intervalStr);
+  if (keySlug) parts.push(keySlug);
+  if (mode.slug) parts.push(mode.slug);
+  if (bpm) parts.push(bpm + 'bpm');
+  if (selTech.length) parts.push(selTech.join('-'));
+  if (selSection.length) parts.push(selSection.join('-'));
+  if (noteVal) parts.push(noteVal);
+
+  document.getElementById('outputBox').textContent = parts.length ? parts.join('_') : '—';
+}
+
+function copyOutput() {
+  var text = document.getElementById('outputBox').textContent;
+  if (text === '—') return;
+  navigator.clipboard.writeText(text).then(function() {
+    var btn = document.getElementById('copyBtn');
+    btn.textContent = 'Copied \u2713';
+    btn.classList.add('copied');
+    setTimeout(function() { btn.textContent = 'Copy filename'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+buildKeyGrid();
+buildSimpleTags('techTags', TECHS, selTech, 'sfeel');
+buildSimpleTags('sectionTags', SECTIONS, selSection, 'sext');
+renderAll();
+</script>
+</body>
+</html>

@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lideon Studios — Guitar Theory Hub</title>
+<meta name="description" content="Guitar theory tools for 7-string Drop A. CAGED system, progressions, rhythm patterns, practice tracker and more.">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --bg:#09090b;
+  --surface:#0f0f12;
+  --surface2:#151518;
+  --surface3:#1c1c21;
+  --border:#1e1e26;
+  --border2:#2a2a35;
+  --text:#e0deda;
+  --muted:#4a4858;
+  --muted2:#6a6878;
+  --red:#b83228;
+  --red-bright:#e04030;
+  --red-dim:rgba(184,50,40,0.1);
+  --red-glow:rgba(184,50,40,0.2);
+  --blue:#1a6fa8;
+  --blue-dim:rgba(26,111,168,0.1);
+  --green:#1a8048;
+  --green-dim:rgba(26,128,72,0.1);
+  --amber:#c07820;
+  --amber-dim:rgba(192,120,32,0.1);
+  --purple:#7040c0;
+  --purple-dim:rgba(112,64,192,0.1);
+  --mono:'Space Mono',monospace;
+  --sans:'Inter',sans-serif;
+}
+
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);color:var(--text);
+  font-family:var(--sans);min-height:100vh;
+  overflow-x:hidden;
+}
+
+/* ── HERO ── */
+.hero{
+  min-height:100vh;
+  display:flex;flex-direction:column;
+  justify-content:center;
+  padding:48px 24px;
+  position:relative;overflow:hidden;
+}
+
+/* animated grid background */
+.hero::before{
+  content:'';
+  position:absolute;inset:0;
+  background-image:
+    linear-gradient(var(--border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border) 1px, transparent 1px);
+  background-size:48px 48px;
+  opacity:0.4;
+  animation:gridShift 20s linear infinite;
+}
+@keyframes gridShift{
+  0%{background-position:0 0}
+  100%{background-position:48px 48px}
+}
+
+/* red corner accent */
+.hero::after{
+  content:'';
+  position:absolute;top:0;left:0;
+  width:280px;height:280px;
+  background:radial-gradient(circle at top left, var(--red-glow), transparent 70%);
+  pointer-events:none;
+}
+
+.hero-inner{position:relative;z-index:1;max-width:640px}
+
+.hero-eyebrow{
+  font-family:var(--mono);font-size:9px;
+  letter-spacing:0.3em;text-transform:uppercase;
+  color:var(--red);margin-bottom:20px;
+  display:flex;align-items:center;gap:10px;
+}
+.hero-eyebrow::before{
+  content:'';display:block;
+  width:24px;height:1px;background:var(--red);
+}
+
+.hero-title{
+  font-family:var(--mono);
+  font-size:clamp(32px,8vw,56px);
+  font-weight:700;line-height:1;
+  color:var(--text);
+  margin-bottom:6px;
+  letter-spacing:-0.02em;
+}
+.hero-title .accent{color:var(--red)}
+
+.hero-sub{
+  font-family:var(--mono);font-size:13px;
+  color:var(--muted2);margin-bottom:28px;
+  letter-spacing:0.05em;
+}
+
+.hero-desc{
+  font-size:14px;color:var(--muted2);
+  line-height:1.8;max-width:480px;
+  margin-bottom:36px;
+}
+
+.hero-tags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:40px}
+.htag{
+  font-family:var(--mono);font-size:9px;
+  letter-spacing:0.08em;text-transform:uppercase;
+  padding:5px 10px;
+  background:var(--surface2);border:1px solid var(--border2);
+  color:var(--muted2);
+}
+
+.scroll-hint{
+  display:flex;align-items:center;gap:10px;
+  font-family:var(--mono);font-size:9px;
+  letter-spacing:0.15em;text-transform:uppercase;
+  color:var(--muted);
+  animation:hintPulse 2.5s ease-in-out infinite;
+}
+.scroll-hint::after{
+  content:'↓';font-size:14px;color:var(--red);
+}
+@keyframes hintPulse{0%,100%{opacity:0.4}50%{opacity:1}}
+
+/* ── TOOLS SECTION ── */
+.tools-section{padding:60px 24px;max-width:900px;margin:0 auto}
+
+.section-header{
+  display:flex;align-items:baseline;gap:16px;
+  margin-bottom:32px;
+  padding-bottom:12px;
+  border-bottom:1px solid var(--border);
+}
+.section-title{
+  font-family:var(--mono);font-size:11px;
+  letter-spacing:0.2em;text-transform:uppercase;
+  color:var(--muted2);
+}
+.section-line{flex:1;height:1px;background:var(--border)}
+
+/* TOOL GRID */
+.tool-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
+  gap:8px;
+  margin-bottom:48px;
+}
+
+.tool-card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  padding:20px;
+  text-decoration:none;
+  color:inherit;
+  display:block;
+  position:relative;
+  transition:border-color 0.15s, background 0.15s;
+  overflow:hidden;
+}
+.tool-card::before{
+  content:'';
+  position:absolute;top:0;left:0;right:0;height:1px;
+  background:var(--card-accent, var(--red));
+  transform:scaleX(0);transform-origin:left;
+  transition:transform 0.2s;
+}
+.tool-card:hover{border-color:var(--border2);background:var(--surface2)}
+.tool-card:hover::before{transform:scaleX(1)}
+
+.tool-card.accent-red{--card-accent:var(--red)}
+.tool-card.accent-blue{--card-accent:var(--blue)}
+.tool-card.accent-green{--card-accent:var(--green)}
+.tool-card.accent-amber{--card-accent:var(--amber)}
+.tool-card.accent-purple{--card-accent:var(--purple)}
+
+.card-tag{
+  font-family:var(--mono);font-size:8px;
+  letter-spacing:0.12em;text-transform:uppercase;
+  padding:3px 7px;display:inline-block;
+  margin-bottom:12px;
+}
+.tag-red{background:var(--red-dim);color:var(--red);border:1px solid rgba(184,50,40,0.3)}
+.tag-blue{background:var(--blue-dim);color:var(--blue);border:1px solid rgba(26,111,168,0.3)}
+.tag-green{background:var(--green-dim);color:var(--green);border:1px solid rgba(26,128,72,0.3)}
+.tag-amber{background:var(--amber-dim);color:var(--amber);border:1px solid rgba(192,120,32,0.3)}
+.tag-purple{background:var(--purple-dim);color:var(--purple);border:1px solid rgba(112,64,192,0.3)}
+
+.card-title{
+  font-family:var(--mono);font-size:14px;font-weight:700;
+  color:var(--text);line-height:1.2;margin-bottom:6px;
+}
+.card-desc{font-size:11px;color:var(--muted2);line-height:1.6;margin-bottom:14px}
+
+.card-footer{
+  display:flex;align-items:center;justify-content:space-between;
+  padding-top:12px;border-top:1px solid var(--border);
+}
+.card-detail{font-family:var(--mono);font-size:8px;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase}
+.card-arrow{
+  font-size:14px;color:var(--muted);
+  transition:transform 0.15s,color 0.15s;
+}
+.tool-card:hover .card-arrow{transform:translateX(4px);color:var(--text)}
+
+/* FEATURED CARD */
+.tool-card.featured{
+  grid-column:1/-1;
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:20px;
+  align-items:center;
+  padding:24px;
+  border-color:var(--border2);
+}
+.tool-card.featured .card-desc{margin-bottom:0}
+.tool-card.featured .card-right{
+  text-align:right;flex-shrink:0;
+}
+.featured-num{
+  font-family:var(--mono);font-size:48px;font-weight:700;
+  color:var(--border2);line-height:1;
+}
+
+/* ── FOOTER ── */
+.footer{
+  padding:32px 24px;
+  border-top:1px solid var(--border);
+  text-align:center;
+}
+.footer-logo{
+  font-family:var(--mono);font-size:13px;font-weight:700;
+  color:var(--text);margin-bottom:6px;
+}
+.footer-logo span{color:var(--red)}
+.footer-sub{font-family:var(--mono);font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted)}
+
+/* ── RESPONSIVE ── */
+@media(max-width:480px){
+  .tool-card.featured{grid-template-columns:1fr}
+  .tool-card.featured .card-right{display:none}
+  .hero-title{font-size:36px}
+}
+</style>
+</head>
+<body>
+
+<!-- ── HERO ── -->
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-eyebrow">Lideon Studios</div>
+    <h1 class="hero-title">Guitar<br>Theory<span class="accent">.</span></h1>
+    <div class="hero-sub">7-String · Drop A · Deathcore / Metalcore</div>
+    <p class="hero-desc">
+      A personal suite of theory tools, rhythm references, and practice tracking
+      built for learning death metal guitar from the ground up.
+      No subscriptions. No paywalls. Just the knowledge.
+    </p>
+    <div class="hero-tags">
+      <span class="htag">CAGED System</span>
+      <span class="htag">All 12 Keys</span>
+      <span class="htag">Chord Progressions</span>
+      <span class="htag">Sweep Shapes</span>
+      <span class="htag">Rhythm Patterns</span>
+      <span class="htag">Practice Tracking</span>
+    </div>
+    <div class="scroll-hint">Open a tool</div>
+  </div>
+</section>
+
+<!-- ── TOOLS ── -->
+<div class="tools-section">
+
+  <div class="section-header">
+    <span class="section-title">Theory & Reference</span>
+    <div class="section-line"></div>
+  </div>
+
+  <div class="tool-grid">
+
+    <a href="caged-all-keys.html" class="tool-card featured accent-red">
+      <div class="card-left">
+        <span class="card-tag tag-red">Essential</span>
+        <div class="card-title">CAGED System — All 12 Keys</div>
+        <p class="card-desc">Full fretboard map for every key and mode on a 7-string in Drop A. Switch keys and watch every position update live. Natural minor, major, Phrygian dominant, and pentatonic.</p>
+        <div class="card-footer" style="border:none;padding:0;margin-top:14px">
+          <span class="card-detail">12 keys · 5 positions · 4 modes</span>
+          <span class="card-arrow">→</span>
+        </div>
+      </div>
+      <div class="card-right">
+        <div class="featured-num">12</div>
+      </div>
+    </a>
+
+    <a href="caged-fretboard.html" class="tool-card accent-red">
+      <span class="card-tag tag-red">Fretboard</span>
+      <div class="card-title">CAGED — A Minor Map</div>
+      <p class="card-desc">Visual fretboard showing all 5 CAGED positions in A minor. Root dots, thirds, fifths mapped across all 7 strings. Your starting reference.</p>
+      <div class="card-footer">
+        <span class="card-detail">A minor · 7 strings · frets 0–15</span>
+        <span class="card-arrow">→</span>
+      </div>
+    </a>
+
+    <a href="interval-namer.html" class="tool-card accent-blue">
+      <span class="card-tag tag-blue">Theory</span>
+      <div class="card-title">Intervals → Notes</div>
+      <p class="card-desc">Pick a root key and every roman numeral instantly shows its actual note name. Includes file namer for labeling your samples with interval notation.</p>
+      <div class="card-footer">
+        <span class="card-detail">All intervals · File namer · 4 modes</span>
+        <span class="card-arrow">→</span>
+      </div>
+    </a>
+
+    <a href="deathcore-progressions.html" class="tool-card accent-purple">
+      <span class="card-tag tag-purple">Progressions</span>
+      <div class="card-title">Deathcore Progressions</div>
+      <p class="card-desc">8 genre-specific chord progressions with fret maps, riff skeletons, and artist references. Transpose to any key. Landmarks only — fill the rest yourself.</p>
+      <div class="card-footer">
+        <span class="card-detail">8 progressions · Angelmaker · Carcosa · Lorna Shore</span>
+        <span class="card-arrow">→</span>
+      </div>
+    </a>
+
+  </div>
+
+  <div class="section-header">
+    <span class="section-title">Technique</span>
+    <div class="section-line"></div>
+  </div>
+
+  <div class="tool-grid">
+
+    <a href="sweeps-cascades.html" class="tool-card accent-amber">
+      <span class="card-tag tag-amber">Technique</span>
+      <div class="card-title">Sweeps & Open Cascades</div>
+      <p class="card-desc">Sweep shapes for Drop A 7-string including the 7-string exclusive launch sweep. Open string cascade patterns and how to integrate them into a deathcore context.</p>
+      <div class="card-footer">
+        <span class="card-detail">4 sweep shapes · 4 cascade patterns · Integration tab</span>
+        <span class="card-arrow">→</span>
+      </div>
+    </a>
+
+    <a href="rhythm-patterns.html" class="tool-card accent-green">
+      <span class="card-tag tag-green">Rhythm</span>
+      <div class="card-title">Rhythm Pattern Explorer</div>
+      <p class="card-desc">Playable strumming patterns with audio and visual sequencer. Triplets, gallops, syncopation, duo-pause combos, and artist-specific patterns. Hear the feel, not just read it.</p>
+      <div class="card-footer">
+        <span class="card-detail">15 patterns · Playable audio · BPM adjustable</span>
+        <span class="card-arrow">→</span>
+      </div>
+    </a>
+
+  </div>
+
+  <div class="section-header">
+    <span class="section-title">Practice</span>
+    <div class="section-line"></div>
+  </div>
+
+  <div class="tool-grid">
+
+    <a href="practice-tracker.html" class="tool-card featured accent-green">
+      <div class="card-left">
+        <span class="card-tag tag-green">Tracker</span>
+        <div class="card-title">Practice Log & Analytics</div>
+        <p class="card-desc">Log every session — techniques, CAGED positions, BPM, amp sim presets, riffs made, mood. Analytics show your streak, most and least practiced techniques, BPM progression over time, and a practice heatmap.</p>
+        <div class="card-footer" style="border:none;padding:0;margin-top:14px">
+          <span class="card-detail">Persistent storage · Streak tracker · Technique analytics</span>
+          <span class="card-arrow">→</span>
+        </div>
+      </div>
+      <div class="card-right">
+        <div class="featured-num" style="color:rgba(26,128,72,0.2)">∞</div>
+      </div>
+    </a>
+
+    <a href="practice-plan.html" class="tool-card accent-blue">
+      <span class="card-tag tag-blue">Plan</span>
+      <div class="card-title">12-Week Practice Plan</div>
+      <p class="card-desc">Three phases covering alternate picking fundamentals through full song recording. Day-by-day sessions with expandable blocks, milestone checklist, and EZ Drummer 3 integration.</p>
+      <div class="card-footer">
+        <span class="card-detail">3 phases · 12 weeks · Milestones</span>
+        <span class="card-arrow">→</span>
+      </div>
+    </a>
+
+  </div>
+
+</div>
+
+<!-- ── FOOTER ── -->
+<footer class="footer">
+  <div class="footer-logo">Lideon<span>.</span>Studios</div>
+  <div class="footer-sub">hundo · 7-string · Drop A · deathcore</div>
+</footer>
+
+</body>
+</html>
